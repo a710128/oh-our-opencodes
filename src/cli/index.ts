@@ -53,10 +53,10 @@ function parseArgs(args: string[]): InstallArgs {
 
 function printHelp(): void {
   console.log(`
-oh-my-opencode-slim installer
+oh-our-opencodes installer
 
-Usage: bunx oh-my-opencode-slim install [OPTIONS]
-       bunx oh-my-opencode-slim models [OPTIONS]
+Usage: bunx oh-our-opencodes install [OPTIONS]
+       bunx oh-our-opencodes models [OPTIONS]
 
 Options:
   --kimi=yes|no          Kimi API access (yes/no)
@@ -79,9 +79,9 @@ Options:
   -h, --help             Show this help message
 
 Examples:
-  bunx oh-my-opencode-slim install
-  bunx oh-my-opencode-slim models
-  bunx oh-my-opencode-slim install --no-tui --kimi=yes --openai=yes --anthropic=yes --copilot=no --zai-plan=no --antigravity=yes --chutes=no --opencode-free=yes --balanced-spend=yes --opencode-free-model=auto --aa-key=YOUR_AA_KEY --openrouter-key=YOUR_OR_KEY --tmux=no --skills=yes
+  bunx oh-our-opencodes install
+  bunx oh-our-opencodes models
+  bunx oh-our-opencodes install --no-tui --kimi=yes --openai=yes --anthropic=yes --copilot=no --zai-plan=no --antigravity=yes --chutes=no --opencode-free=yes --balanced-spend=yes --opencode-free-model=auto --aa-key=YOUR_AA_KEY --openrouter-key=YOUR_OR_KEY --tmux=no --skills=yes
 `);
 }
 

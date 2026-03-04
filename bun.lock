@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "oh-my-opencode-slim",
+      "name": "oh-our-opencodes",
       "dependencies": {
         "@ast-grep/cli": "^0.40.0",
         "@modelcontextprotocol/sdk": "^1.26.0",

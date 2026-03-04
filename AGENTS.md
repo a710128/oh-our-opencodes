@@ -1,235 +1,140 @@
-# Agent Coding Guidelines
+# Agent Notes for oh-our-opencodes
 
-This document provides guidelines for AI agents operating in this repository.
+This repository is a TypeScript (ESM) OpenCode plugin built with Bun.
+Use this document as the default operational guide for agentic coding.
 
-## Project Overview
+## Build / Lint / Test
 
-**oh-my-opencode-slim** - A lightweight agent orchestration plugin for OpenCode, a slimmed-down fork of oh-my-opencode. Built with TypeScript, Bun, and Biome.
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `bun run build` | Build TypeScript to `dist/` (both index.ts and cli/index.ts) |
-| `bun run typecheck` | Run TypeScript type checking without emitting |
-| `bun test` | Run all tests with Bun |
-| `bun run lint` | Run Biome linter on entire codebase |
-| `bun run format` | Format entire codebase with Biome |
-| `bun run check` | Run Biome check with auto-fix (lint + format + organize imports) |
-| `bun run check:ci` | Run Biome check without auto-fix (CI mode) |
-| `bun run dev` | Build and run with OpenCode |
-
-**Running a single test:** Use Bun's test filtering with the `-t` flag:
-```bash
-bun test -t "test-name-pattern"
-```
-
-## Code Style
-
-### General Rules
-- **Formatter/Linter:** Biome (configured in `biome.json`)
-- **Line width:** 80 characters
-- **Indentation:** 2 spaces
-- **Line endings:** LF (Unix)
-- **Quotes:** Single quotes in JavaScript/TypeScript
-- **Trailing commas:** Always enabled
-
-### TypeScript Guidelines
-- **Strict mode:** Enabled in `tsconfig.json`
-- **No explicit `any`:** Generates a linter warning (disabled for test files)
-- **Module resolution:** `bundler` strategy
-- **Declarations:** Generate `.d.ts` files in `dist/`
-
-### Imports
-- Biome auto-organizes imports on save (`organizeImports: "on"`)
-- Let the formatter handle import sorting
-- Use path aliases defined in TypeScript configuration if present
-
-### Naming Conventions
-- **Variables/functions:** camelCase
-- **Classes/interfaces:** PascalCase
-- **Constants:** SCREAMING_SNAKE_CASE
-- **Files:** kebab-case for most, PascalCase for React components
-
-### Error Handling
-- Use typed errors with descriptive messages
-- Let errors propagate appropriately rather than catching silently
-- Use Zod for runtime validation (already a dependency)
-
-### Git Integration
-- Biome integrates with git (VCS enabled)
-- Commits should pass `bun run check:ci` before pushing
-
-## Project Structure
-
-```
-oh-my-opencode-slim/
-├── src/              # TypeScript source files
-├── dist/             # Built JavaScript and declarations
-├── node_modules/     # Dependencies
-├── biome.json        # Biome configuration
-├── tsconfig.json     # TypeScript configuration
-└── package.json      # Project manifest and scripts
-```
-
-## Key Dependencies
-
-- `@modelcontextprotocol/sdk` - MCP protocol implementation
-- `@opencode-ai/sdk` - OpenCode AI SDK
-- `zod` - Runtime validation
-- `vscode-jsonrpc` / `vscode-languageserver-protocol` - LSP support
-
-## Development Workflow
-
-1. Make code changes
-2. Run `bun run check:ci` to verify linting and formatting
-3. Run `bun run typecheck` to verify types
-4. Run `bun test` to verify tests pass
-5. Commit changes
-
-## Tmux Session Lifecycle Management
-
-When working with tmux integration, understanding the session lifecycle is crucial for preventing orphaned processes and ghost panes.
-
-### Session Lifecycle Flow
-
-```
-Task Launch:
-  session.create() → tmux pane spawned → task runs
-
-Task Completes Normally:
-  session.status (idle) → extract results → session.abort()
-  → session.deleted event → tmux pane closed
-
-Task Cancelled:
-  cancel() → session.abort() → session.deleted event
-  → tmux pane closed
-
-Session Deleted Externally:
-  session.deleted event → task cleanup → tmux pane closed
-```
-
-### Key Implementation Details
-
-**1. Graceful Shutdown (src/utils/tmux.ts)**
-```typescript
-// Always send Ctrl+C before killing pane
-spawn([tmux, "send-keys", "-t", paneId, "C-c"])
-await delay(250)
-spawn([tmux, "kill-pane", "-t", paneId])
-```
-
-**2. Session Abort Timing (src/background/background-manager.ts)**
-- Call `session.abort()` AFTER extracting task results
-- This ensures content is preserved before session termination
-- Triggers `session.deleted` event for cleanup
-
-**3. Event Handlers (src/index.ts)**
-Both handlers must be wired up:
-- `backgroundManager.handleSessionDeleted()` - cleans up task state
-- `tmuxSessionManager.onSessionDeleted()` - closes tmux pane
-
-### Testing Tmux Integration
-
-After making changes to session management:
+All commands are run from the repo root.
 
 ```bash
-# 1. Build the plugin
+# Install
+bun install
+
+# Build JS bundles + emit .d.ts
 bun run build
 
-# 2. Run from local fork (in ~/.config/opencode/opencode.jsonc):
-# "plugin": ["file:///path/to/oh-my-opencode-slim"]
+# Typecheck only
+bun run typecheck
 
-# 3. Launch test tasks
-@explorer count files in src/
-@librarian search for Bun documentation
+# Lint (no autofix)
+bun run lint
 
-# 4. Verify no orphans
-ps aux | grep "opencode attach" | grep -v grep
-# Should return 0 processes after tasks complete
+# Format (writes)
+bun run format
+
+# One-shot "fix everything" (writes): format + lint + organize imports
+bun run check
+
+# CI-style check (no writes)
+bun run check:ci
+
+# Run tests
+bun test
+
+# Build then run OpenCode (requires `opencode` installed)
+bun run dev
 ```
 
-### Common Issues
+CI runs: `bun install --frozen-lockfile` then `lint`, `typecheck`, `bun test`, `build`.
 
-**Ghost panes remaining open:**
-- Check that `session.abort()` is called after result extraction
-- Verify `session.deleted` handler is wired in src/index.ts
-
-**Orphaned opencode attach processes:**
-- Ensure graceful shutdown sends Ctrl+C before kill-pane
-- Check that tmux pane closes before process termination
-
-## Pre-Push Code Review
-
-Before pushing changes to the repository, always run a code review to catch issues like:
-- Duplicate code
-- Redundant function calls
-- Race conditions
-- Logic errors
-
-### Using `/review` Command (Recommended)
-
-OpenCode has a built-in `/review` command that automatically performs comprehensive code reviews:
+## Running A Single Test (Bun)
 
 ```bash
-# Review uncommitted changes (default)
-/review
+# Run one test file
+bun test src/utils/logger.test.ts
 
-# Review specific commit
-/review <commit-hash>
+# Run tests in files whose path/name matches a pattern
+bun test logger
 
-# Review branch comparison
-/review <branch-name>
+# Run a single test by name (regex)
+bun test -t "writes log message"
 
-# Review PR
-/review <pr-url-or-number>
+# Use .only in code, then enforce only-only mode
+bun test --only
 ```
 
-**Why use `/review` instead of asking @oracle manually?**
-- Standardized review process with consistent focus areas (bugs, structure, performance)
-- Automatically handles git operations (diff, status, etc.)
-- Context-aware: reads full files and convention files (AGENTS.md, etc.)
-- Delegates to specialized @build subagent with proper permissions
-- Provides actionable, matter-of-fact feedback
+Notes:
+- `bun test [<patterns>]` filters by file name/path.
+- `-t/--test-name-pattern` filters by test name (regex).
 
-### Workflow Before Pushing
+## Tooling And Project Layout
 
-1. **Make your changes**
-   ```bash
-   # ... edit files ...
-   ```
+- Language: TypeScript, strict mode (`tsconfig.json`).
+- Module system: ESM (`"type": "module"` in `package.json`).
+- Lint/format: Biome (`biome.json`). Import organization is enabled.
+- Build output: `dist/` via `bun build`, plus declarations via `tsc --emitDeclarationOnly`.
+- Tests: Bun test runner (`bun:test`). Tests live in `src/**/*.test.ts`.
 
-2. **Stage changes**
-   ```bash
-   git add .
-   ```
+Key entry points:
+- `src/index.ts` (plugin entry)
+- `src/cli/index.ts` (CLI entry)
 
-3. **Run code review**
-   ```
-   /review
-   ```
+## Code Style (Enforced By Biome)
 
-4. **Address any issues found**
+Biome is the source of truth. When in doubt:
 
-5. **Run checks**
-   ```bash
-   bun run check:ci
-   bun test
-   ```
+```bash
+bun run check
+```
 
-6. **Commit and push**
-   ```bash
-   git commit -m "..."
-   git push origin <branch>
-   ```
+Formatting expectations (see `biome.json`):
+- Indentation: 2 spaces
+- Quotes: single quotes
+- Line width: 80
+- Line endings: LF
+- Trailing commas: enabled
 
-**Note:** The `/review` command found issues in our PR #127 (duplicate code, redundant abort calls) that neither linter nor tests caught. Always use it before pushing!
+## Imports
 
-## Common Patterns
+Prefer these conventions (Biome will also reorganize):
+- Use `node:` specifiers for Node built-ins (example: `import * as fs from 'node:fs'`).
+- Use `import type { ... } from '...'` for type-only imports.
+- Grouping guideline: Node built-ins, then external deps, then local modules.
 
-- This is an OpenCode plugin - most functionality lives in `src/`
-- The CLI entry point is `src/cli/index.ts`
-- The main plugin export is `src/index.ts`
-- Skills are located in `src/skills/` (included in package publish)
-- Background task management is in `src/background/`
-- Tmux utilities are in `src/utils/tmux.ts`
+## Types And Interfaces
+
+- Keep TypeScript `strict`-compatible.
+- Prefer `unknown` over `any` and narrow explicitly.
+- Avoid `any` in production code; Biome warns on explicit `any`.
+  - Exception: tests may use `any` when it simplifies test setup.
+- Prefer explicit return types for exported functions.
+- Use `zod` for runtime validation of untrusted inputs (config, tool args, etc.).
+
+## Naming
+
+- Files/dirs: typically kebab-case for feature folders (examples in `src/hooks/`).
+- Types/interfaces: `PascalCase`.
+- Values/functions: `camelCase`.
+- Constants: `SCREAMING_SNAKE_CASE` for true constants; otherwise `camelCase`.
+
+## Error Handling
+
+- Do not swallow errors unless the operation is best-effort (example: logging).
+- When catching unknown errors, preserve message safely:
+  - `e instanceof Error ? e.message : String(e)`
+- Prefer returning typed results with an `error` string for tool-style APIs.
+- Throw `Error` with actionable messages when the caller must handle/abort.
+
+## Testing Conventions
+
+- Use `bun:test` exports: `describe`, `test`/`it`, `expect`, and lifecycle hooks.
+- Keep tests deterministic; avoid real network calls.
+- Prefer small, focused tests around pure functions and parsing/formatting logic.
+- When tests interact with the filesystem, use temp locations (`os.tmpdir()`) and clean up.
+
+## Agent-Specific Repository Instructions
+
+There are no Cursor rule files (`.cursor/rules/**` or `.cursorrules`) and no
+Copilot instruction file (`.github/copilot-instructions.md`) in this repo.
+
+Relevant in-repo guidance for agents:
+- `codemap.md` describes architecture and canonical dev commands.
+- `src/skills/cartography/SKILL.md` documents the cartography workflow for
+  producing/refreshing codemaps.
+
+## Practical Workflow For Agents
+
+- Prefer repo scripts (`bun run ...`) over ad-hoc commands.
+- Before changing behavior: add/adjust tests, then run `bun test`.
+- Before handing work back: run `bun run check:ci` and `bun run typecheck`.

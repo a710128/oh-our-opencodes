@@ -53,7 +53,7 @@ describe('paths', () => {
   test('getLiteConfig() returns correct path', () => {
     process.env.XDG_CONFIG_HOME = '/tmp/xdg-config';
     expect(getLiteConfig()).toBe(
-      '/tmp/xdg-config/opencode/oh-my-opencode-slim.json',
+      '/tmp/xdg-config/opencode/oh-our-opencodes.json',
     );
   });
 

@@ -4,11 +4,11 @@ import { extractChannel, findPluginEntry, getLocalDevVersion } from './checker';
 
 // Mock the dependencies
 mock.module('./constants', () => ({
-  PACKAGE_NAME: 'oh-my-opencode-slim',
+  PACKAGE_NAME: 'oh-our-opencodes',
   USER_OPENCODE_CONFIG: '/mock/config/opencode.json',
   USER_OPENCODE_CONFIG_JSONC: '/mock/config/opencode.jsonc',
   INSTALLED_PACKAGE_JSON:
-    '/mock/cache/node_modules/oh-my-opencode-slim/package.json',
+    '/mock/cache/node_modules/oh-our-opencodes/package.json',
 }));
 
 mock.module('node:fs', () => ({
@@ -61,12 +61,12 @@ describe('auto-update-checker/checker', () => {
       readMock.mockImplementation((p: string) => {
         if (p.includes('opencode.json')) {
           return JSON.stringify({
-            plugin: ['file:///dev/oh-my-opencode-slim'],
+            plugin: ['file:///dev/oh-our-opencodes'],
           });
         }
         if (p.includes('package.json')) {
           return JSON.stringify({
-            name: 'oh-my-opencode-slim',
+            name: 'oh-our-opencodes',
             version: '1.2.3-dev',
           });
         }
@@ -85,13 +85,13 @@ describe('auto-update-checker/checker', () => {
       existsMock.mockImplementation((p: string) => p.includes('opencode.json'));
       readMock.mockImplementation(() =>
         JSON.stringify({
-          plugin: ['oh-my-opencode-slim'],
+          plugin: ['oh-our-opencodes'],
         }),
       );
 
       const entry = findPluginEntry('/test');
       expect(entry).not.toBeNull();
-      expect(entry?.entry).toBe('oh-my-opencode-slim');
+      expect(entry?.entry).toBe('oh-our-opencodes');
       expect(entry?.isPinned).toBe(false);
       expect(entry?.pinnedVersion).toBeNull();
     });
@@ -103,7 +103,7 @@ describe('auto-update-checker/checker', () => {
       existsMock.mockImplementation((p: string) => p.includes('opencode.json'));
       readMock.mockImplementation(() =>
         JSON.stringify({
-          plugin: ['oh-my-opencode-slim@1.0.0'],
+          plugin: ['oh-our-opencodes@1.0.0'],
         }),
       );
 

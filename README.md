@@ -12,13 +12,13 @@
 ### Quick Start
 
 ```bash
-bunx oh-my-opencode-slim@latest install
+bunx oh-our-opencodes@latest install
 ```
 
 The installer can refresh and use OpenCode free models directly:
 
 ```bash
-bunx oh-my-opencode-slim@latest install --no-tui --kimi=yes --openai=yes --antigravity=yes --chutes=yes --opencode-free=yes --opencode-free-model=auto --tmux=no --skills=yes
+bunx oh-our-opencodes@latest install --no-tui --kimi=yes --openai=yes --antigravity=yes --chutes=yes --opencode-free=yes --opencode-free-model=auto --tmux=no --skills=yes
 ```
 
 Then authenticate:
@@ -35,7 +35,7 @@ OpenCode free-model mode uses `opencode models --refresh --verbose`, filters to 
 - In hybrid mode, `designer` stays on the external provider mapping.
 - Chutes mode auto-selects primary/support models with daily-cap awareness (300/2000/5000).
 
-> **💡 Models are fully customizable.** Edit `~/.config/opencode/oh-my-opencode-slim.json` (or `.jsonc` for comments support) to assign any model to any agent.
+> **💡 Models are fully customizable.** Edit `~/.config/opencode/oh-our-opencodes.json` (or `.jsonc` for comments support) to assign any model to any agent.
 
 ### For LLM Agents
 
@@ -43,7 +43,7 @@ Paste this into any coding agent:
 
 ```
 Install and configure by following the instructions here:
-https://raw.githubusercontent.com/alvinunreal/oh-my-opencode-slim/refs/heads/master/README.md
+https://raw.githubusercontent.com/a710128/oh-our-opencodes/refs/heads/master/README.md
 ```
 
 **Detailed installation guide:** [docs/installation.md](docs/installation.md)
