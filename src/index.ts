@@ -1,6 +1,7 @@
 import type { Plugin } from '@opencode-ai/plugin';
 import { getAgentConfigs } from './agents';
 import { BackgroundTaskManager, TmuxSessionManager } from './background';
+import { injectedCommands } from './commands';
 import { loadPluginConfig, type TmuxConfig } from './config';
 import { parseList } from './config/agent-mcps';
 import {
@@ -155,6 +156,21 @@ const OhMyOpenCodeLite: Plugin = async (ctx) => {
 
         // Update agent config with permissions
         agentConfigEntry.permission = agentPermission;
+      }
+
+      // Inject custom commands on plugin startup.
+      // NOTE: OpenCode custom commands are configured via `command` in opencode config.
+      let configCommand = opencodeConfig.command as
+        | Record<string, unknown>
+        | undefined;
+      if (!configCommand) {
+        configCommand = {};
+        opencodeConfig.command = configCommand;
+      }
+
+      // Do not override commands defined by user config/files.
+      for (const [name, def] of Object.entries(injectedCommands)) {
+        if (!(name in configCommand)) configCommand[name] = def;
       }
     },
 
