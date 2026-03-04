@@ -12,6 +12,25 @@ const PHASE_REMINDER = `<reminder>Recall Workflow Rules:
 Understand → find the best path (delegate based on rules and parallelize independent work) → execute → verify → Update MemX.
 If delegating, launch the specialist in the same turn you mention it.</reminder>`;
 
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+function formatReminderTimestamp(date: Date): string {
+  const yyyy = date.getFullYear();
+  const MM = pad2(date.getMonth() + 1);
+  const dd = pad2(date.getDate());
+  const HH = pad2(date.getHours());
+  const mm = pad2(date.getMinutes());
+  const ss = pad2(date.getSeconds());
+  return `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}`;
+}
+
+function buildPhaseReminder(): string {
+  const timestamp = formatReminderTimestamp(new Date());
+  return PHASE_REMINDER.replace('<reminder>', `<reminder>[${timestamp}]`);
+}
+
 interface MessageInfo {
   role: string;
   agent?: string;
@@ -79,7 +98,7 @@ export function createPhaseReminderHook() {
       // Prepend the reminder to the existing text
       const originalText = lastUserMessage.parts[textPartIndex].text ?? '';
       lastUserMessage.parts[textPartIndex].text =
-        `${PHASE_REMINDER}\n\n---\n\n${originalText}`;
+        `${buildPhaseReminder()}\n\n---\n\n${originalText}`;
     },
   };
 }
