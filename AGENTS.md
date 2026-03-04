@@ -130,8 +130,6 @@ Copilot instruction file (`.github/copilot-instructions.md`) in this repo.
 
 Relevant in-repo guidance for agents:
 - `codemap.md` describes architecture and canonical dev commands.
-- `src/skills/cartography/SKILL.md` documents the cartography workflow for
-  producing/refreshing codemaps.
 
 ## Practical Workflow For Agents
 

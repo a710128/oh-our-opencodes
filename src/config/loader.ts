@@ -48,7 +48,7 @@ function buildDefaultUserConfig(): PluginConfig {
         explorer: {
           model: DEFAULT_MODELS.explorer,
           temperature: DEFAULT_AGENT_TEMPERATURES.explorer,
-          skills: ['cartography'],
+          skills: [],
           mcps: DEFAULT_AGENT_MCPS.explorer,
         },
         librarian: {

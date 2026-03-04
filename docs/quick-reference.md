@@ -6,7 +6,6 @@ Complete reference for oh-our-opencodes configuration and capabilities.
 
 - [Presets](#presets)
 - [Skills](#skills)
-  - [Cartography](#cartography)
 - [MCP Servers](#mcp-servers)
 - [Tools & Capabilities](#tools--capabilities)
 - [Configuration](#configuration)
@@ -151,9 +150,7 @@ Skills are specialized capabilities provided by external agents and tools. Unlik
 
 ### Custom Skills (bundled in repo)
 
-| Skill | Description | Assigned To |
-|-------|-------------|-------------|
-| [`cartography`](#cartography) | Repository understanding and hierarchical codemap generation | `orchestrator` |
+Currently none.
 
 ### Simplify
 
@@ -166,53 +163,6 @@ Skills are specialized capabilities provided by external agents and tools. Unlik
 **External browser automation for visual verification and testing.**
 
 `agent-browser` provides full high-performance browser automation capabilities. It allows agents to browse the web, interact with elements, and capture screenshots for visual state verification.
-
-### Cartography
-
-**Automated repository mapping through hierarchical codemaps.**
-
-A dedicated guide (with screenshots) lives at: **[docs/cartography.md](cartography.md)**.
-
-`cartography` empowers the Orchestrator to build and maintain a deep architectural understanding of any codebase. Instead of reading thousands of lines of code every time, agents refer to hierarchical `codemap.md` files that describe the *why* and *how* of each directory.
-
-**How to use:**
-
-Just ask the **Orchestrator** to `run cartography`. It will automatically detect if it needs to initialize a new map or update an existing one.
-
-**Why it's useful:**
-
-- **Instant Onboarding:** Help agents (and humans) understand unfamiliar codebases in seconds.
-- **Efficient Context:** Agents only read architectural summaries, saving tokens and improving accuracy.
-- **Change Detection:** Only modified folders are re-analyzed, making updates fast and efficient.
-- **Timeless Documentation:** Focuses on high-level design patterns that don't get stale.
-
-<details>
-<summary><b>Technical Details & Manual Control</b></summary>
-
-The skill uses a background Python engine (`cartographer.py`) to manage state and detect changes.
-
-**How it works under the hood:**
-
-1. **Initialize** - Orchestrator analyzes repo structure and runs `init` to create `.slim/cartography.json` (hashes) and empty templates.
-2. **Map** - Orchestrator spawns specialized **Explorer** sub-agents to fill codemaps with timeless architectural details (Responsibility, Design, Flow, Integration).
-3. **Update** - On subsequent runs, the engine detects changed files and only refreshes codemaps for affected folders.
-
-**Manual Commands:**
-
-```bash
-# Initialize mapping manually
-python3 ~/.config/opencode/skills/cartography/scripts/cartographer.py init \
-  --root . \
-  --include "src/**/*.ts" \
-  --exclude "**/*.test.ts"
-
-# Check for changes since last map
-python3 ~/.config/opencode/skills/cartography/scripts/cartographer.py changes --root .
-
-# Sync hashes after manual map updates
-python3 ~/.config/opencode/skills/cartography/scripts/cartographer.py update --root .
-```
-</details>
 
 ### Skills Assignment
 
