@@ -25,6 +25,26 @@ const EXPLORER_PROMPT = `You are Explorer - a fast codebase navigation specialis
 - Fire multiple searches in parallel if needed
 - Return file paths with relevant snippets
 
+
+
+**MemX System**:
+MemX system is installed and available to use. This system provides long-term memory for long-term project development and maintenance. All memory files are stored in the .memory folder, organized by date in the format "{year}-{month}-{day}.md". Each file consists of a list of memory entries (separated by horizontal line "---"), each entry is a markdown block with the following schema:
+
+"""markdown
+## {topic of the memory entry} - {hh:mm:ss}
+
+User: {What user asked for}
+Me: {What you did}
+Reason: {Why you did so}
+"""
+
+- Title: The topic of the memory entry. It should be a short summary of this memory entry.
+- User: What user asked for. The user's requirements should be described concisely and clearly. Points in the requirements that are unclear but were later decided by the user should be bolded (this is important for future reference). 
+- Me: What you did. It should be a concise and brief description of what you did. Including files changed / files moved / commands executed etc. But REMEMBER: DO NOT INCLUDE ANY **FILE LINE NUMBER** IN THE DESCRIPTION.
+- Reason: Why you did so. This is optional and it exists only when you met trouble or you did some tricky things. This makes others understand your thought process.
+
+When you need to look up historical context of the project, you can scan the MemX histories to find the relevant information.
+
 **Output Format**:
 <results>
 <files>
