@@ -71,7 +71,6 @@ Uses OpenAI models exclusively:
   "presets": {
     "openai": {
       "orchestrator": { "model": "openai/gpt-5.2-codex", "skills": ["*"], "mcps": ["websearch"] },
-      "oracle": { "model": "openai/gpt-5.2-codex", "variant": "high", "skills": [], "mcps": [] },
       "librarian": { "model": "openai/gpt-5.1-codex-mini", "variant": "low", "skills": [], "mcps": ["websearch", "context7", "grep_app"] },
       "explorer": { "model": "openai/gpt-5.1-codex-mini", "variant": "low", "skills": [], "mcps": [] },
       "designer": { "model": "openai/gpt-5.1-codex-mini", "variant": "medium", "skills": ["agent-browser"], "mcps": [] },
@@ -92,7 +91,6 @@ bunx oh-our-opencodes install --antigravity=yes --opencode-free=yes --opencode-f
 
 **Agent Mapping:**
 - Orchestrator: Kimi (if available)
-- Oracle: GPT (if available)
 - Explorer/Librarian/Designer/Fixer: Gemini 3 Flash via Antigravity
 - If OpenCode free mode is enabled, Explorer/Librarian/Fixer may use selected free `opencode/*` support model while `designer` stays on external mapping
 
@@ -123,7 +121,6 @@ Mixed setup combining multiple providers:
   "presets": {
     "alvin": {
       "orchestrator": { "model": "google/claude-opus-4-5-thinking", "skills": ["*"], "mcps": ["*"] },
-      "oracle": { "model": "openai/gpt-5.2-codex", "variant": "high", "skills": [], "mcps": [] },
       "librarian": { "model": "google/gemini-3-flash", "variant": "low", "skills": [], "mcps": ["websearch", "context7", "grep_app"] },
       "explorer": { "model": "cerebras/zai-glm-4.7", "variant": "low", "skills": [], "mcps": [] },
       "designer": { "model": "google/gemini-3-flash", "variant": "medium", "skills": ["agent-browser"], "mcps": [] },
@@ -220,7 +217,6 @@ Control which agents can access which MCP servers using per-agent allowlists:
 |-------|--------------|
 | `orchestrator` | `websearch` |
 | `designer` | none |
-| `oracle` | none |
 | `librarian` | `websearch`, `context7`, `grep_app` |
 | `explorer` | none |
 | `fixer` | none |
@@ -257,9 +253,6 @@ Control which agents can access which MCP servers using the `mcps` array in your
       },
       "librarian": {
         "mcps": ["websearch", "context7", "grep_app"]
-      },
-      "oracle": {
-        "mcps": ["*", "!websearch"]
       }
     }
   }
@@ -417,7 +410,7 @@ The plugin supports **JSONC** format for configuration files, allowing you to:
   "presets": {
     "dev": {
       // Fast models for quick iteration
-      "oracle": { "model": "google/gemini-3-flash" },
+      "librarian": { "model": "google/gemini-3-flash" },
       "explorer": { "model": "google/gemini-3-flash" },
     },
   },

@@ -14,7 +14,6 @@ import { createDesignerAgent } from './designer';
 import { createExplorerAgent } from './explorer';
 import { createFixerAgent } from './fixer';
 import { createLibrarianAgent } from './librarian';
-import { createOracleAgent } from './oracle';
 import { type AgentDefinition, createOrchestratorAgent } from './orchestrator';
 
 export type { AgentDefinition } from './orchestrator';
@@ -43,7 +42,7 @@ function applyOverrides(
 
 /**
  * Apply default permissions to an agent.
- * Sets 'question' permission to 'allow' and includes skill permission presets.
+ * Sets default 'question' permission and includes skill permission presets.
  * If configuredSkills is provided, it honors that list instead of defaults.
  */
 function applyDefaultPermissions(
@@ -61,9 +60,17 @@ function applyDefaultPermissions(
     configuredSkills,
   );
 
+  // By default, most agents can ask the user questions, but we intentionally
+  // disable it for certain subagents to avoid UX spam.
+  const defaultQuestionPermission: 'ask' | 'allow' | 'deny' =
+    agent.name === 'explorer' || agent.name === 'fixer' ? 'deny' : 'allow';
+
   agent.config.permission = {
     ...existing,
-    question: 'allow',
+    // Preserve an explicitly configured value if present.
+    question:
+      (typeof existing.question === 'string' ? existing.question : undefined) ??
+      defaultQuestionPermission,
     // Apply skill permissions as nested object under 'skill' key
     skill: {
       ...(typeof existing.skill === 'object' ? existing.skill : {}),
@@ -85,7 +92,6 @@ export function isSubagent(name: string): name is SubagentName {
 const SUBAGENT_FACTORIES: Record<SubagentName, AgentFactory> = {
   explorer: createExplorerAgent,
   librarian: createLibrarianAgent,
-  oracle: createOracleAgent,
   designer: createDesignerAgent,
   fixer: createFixerAgent,
 };

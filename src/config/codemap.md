@@ -61,7 +61,7 @@ TmuxConfig
 
 **Agent Names**
 - `ORCHESTRATOR_NAME`: `'orchestrator'`
-- `SUBAGENT_NAMES`: `['explorer', 'librarian', 'oracle', 'designer', 'fixer']`
+- `SUBAGENT_NAMES`: `['explorer', 'librarian', 'designer', 'fixer']`
 - `ALL_AGENT_NAMES`: All agents combined
 - `AGENT_ALIASES`: Legacy name mappings
 
@@ -212,7 +212,6 @@ deepMerge(base, override)
 |------------|---------------------------------------|
 | orchestrator | `['websearch']`                       |
 | designer    | `[]`                                  |
-| oracle      | `[]`                                  |
 | librarian   | `['websearch', 'context7', 'grep_app']` |
 | explorer    | `[]`                                  |
 | fixer       | `[]`                                  |
@@ -222,7 +221,6 @@ deepMerge(base, override)
 | Agent      | Model                          |
 |------------|--------------------------------|
 | orchestrator | `kimi-for-coding/k2p5`        |
-| oracle      | `openai/gpt-5.2-codex`        |
 | librarian   | `openai/gpt-5.1-codex-mini`   |
 | explorer    | `openai/gpt-5.1-codex-mini`   |
 | designer    | `kimi-for-coding/k2p5`        |

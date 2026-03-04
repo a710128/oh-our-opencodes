@@ -177,7 +177,7 @@ describe('config-io', () => {
         presets: {
           openai: {
             orchestrator: { model: 'openai/gpt-4' },
-            oracle: { model: 'anthropic/claude-opus-4-6' },
+            designer: { model: 'anthropic/claude-opus-4-6' },
             explorer: { model: 'github-copilot/grok-code-fast-1' },
             librarian: { model: 'zai-coding-plan/glm-4.7' },
           },

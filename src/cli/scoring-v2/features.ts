@@ -54,7 +54,6 @@ function kimiVersionBonus(
 
   const qwenPenalty: Record<ScoringAgentName, number> = {
     orchestrator: -6,
-    oracle: -6,
     designer: -8,
     explorer: -6,
     librarian: -12,
@@ -62,7 +61,6 @@ function kimiVersionBonus(
   };
   const kimiBonus: Record<ScoringAgentName, number> = {
     orchestrator: 1,
-    oracle: 1,
     designer: 3,
     explorer: 2,
     librarian: 2,
@@ -70,7 +68,6 @@ function kimiVersionBonus(
   };
   const minimaxBonus: Record<ScoringAgentName, number> = {
     orchestrator: 1,
-    oracle: 1,
     designer: 2,
     explorer: 4,
     librarian: 4,

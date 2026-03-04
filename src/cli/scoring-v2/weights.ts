@@ -25,13 +25,6 @@ const AGENT_WEIGHT_OVERRIDES: Record<
     coding: 16,
     latencyPenalty: -2,
   },
-  oracle: {
-    reasoning: 26,
-    quality: 20,
-    coding: 18,
-    latencyPenalty: -2,
-    output: 7,
-  },
   designer: {
     attachment: 12,
     output: 10,

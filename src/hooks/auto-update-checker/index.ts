@@ -47,7 +47,7 @@ export function createAutoUpdateCheckerHook(
           if (showStartupToast) {
             showToast(
               ctx,
-              `OMO-Slim ${displayVersion} (dev)`,
+              `oh-our-opencodes ${displayVersion} (dev)`,
               'Running in local development mode.',
               'info',
             );
@@ -59,7 +59,7 @@ export function createAutoUpdateCheckerHook(
         if (showStartupToast) {
           showToast(
             ctx,
-            `OMO-Slim ${displayVersion ?? 'unknown'}`,
+            `oh-our-opencodes ${displayVersion ?? 'unknown'}`,
             'oh-our-opencodes is active.',
             'info',
           );
@@ -120,7 +120,7 @@ async function runBackgroundUpdateCheck(
   if (!autoUpdate) {
     showToast(
       ctx,
-      `OMO-Slim ${latestVersion}`,
+      `oh-our-opencodes ${latestVersion}`,
       `v${latestVersion} available. Restart to apply.`,
       'info',
       8000,
@@ -138,7 +138,7 @@ async function runBackgroundUpdateCheck(
     if (!updated) {
       showToast(
         ctx,
-        `OMO-Slim ${latestVersion}`,
+        `oh-our-opencodes ${latestVersion}`,
         `v${latestVersion} available. Restart to apply.`,
         'info',
         8000,
@@ -158,7 +158,7 @@ async function runBackgroundUpdateCheck(
   if (installSuccess) {
     showToast(
       ctx,
-      'OMO-Slim Updated!',
+      'oh-our-opencodes Updated!',
       `v${currentVersion} → v${latestVersion}\nRestart OpenCode to apply.`,
       'success',
       8000,
@@ -169,7 +169,7 @@ async function runBackgroundUpdateCheck(
   } else {
     showToast(
       ctx,
-      `OMO-Slim ${latestVersion}`,
+      `oh-our-opencodes ${latestVersion}`,
       `v${latestVersion} available. Restart to apply.`,
       'info',
       8000,

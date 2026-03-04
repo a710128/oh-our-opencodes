@@ -683,7 +683,6 @@ async function runManualSetupMode(
   const manualAgentConfigs: Record<string, ManualAgentConfig> = {};
   const agentNames = [
     'orchestrator',
-    'oracle',
     'designer',
     'explorer',
     'librarian',
@@ -857,7 +856,7 @@ async function runInteractiveMode(
             rl,
             discovery.models,
             recommendedPrimary,
-            'Choose primary model for orchestrator/oracle',
+            'Choose primary model for orchestrator',
           );
         }
 
@@ -968,7 +967,7 @@ async function runInteractiveMode(
             rl,
             discovery.models,
             recommendedPrimary,
-            'Choose Chutes primary model for orchestrator/oracle/designer',
+            'Choose Chutes primary model for orchestrator/designer',
           );
         }
 

@@ -4,7 +4,6 @@ import type { InstallConfig } from './types';
 
 const AGENT_NAMES = [
   'orchestrator',
-  'oracle',
   'designer',
   'explorer',
   'librarian',
@@ -17,7 +16,6 @@ type AgentName = (typeof AGENT_NAMES)[number];
 export const MODEL_MAPPINGS = {
   kimi: {
     orchestrator: { model: 'kimi-for-coding/k2p5' },
-    oracle: { model: 'kimi-for-coding/k2p5', variant: 'high' },
     librarian: { model: 'kimi-for-coding/k2p5', variant: 'low' },
     explorer: { model: 'kimi-for-coding/k2p5', variant: 'low' },
     designer: { model: 'kimi-for-coding/k2p5', variant: 'medium' },
@@ -25,7 +23,6 @@ export const MODEL_MAPPINGS = {
   },
   openai: {
     orchestrator: { model: 'openai/gpt-5.3-codex' },
-    oracle: { model: 'openai/gpt-5.3-codex', variant: 'high' },
     librarian: { model: 'openai/gpt-5.1-codex-mini', variant: 'low' },
     explorer: { model: 'openai/gpt-5.1-codex-mini', variant: 'low' },
     designer: { model: 'openai/gpt-5.1-codex-mini', variant: 'medium' },
@@ -33,7 +30,6 @@ export const MODEL_MAPPINGS = {
   },
   anthropic: {
     orchestrator: { model: 'anthropic/claude-opus-4-6' },
-    oracle: { model: 'anthropic/claude-opus-4-6', variant: 'high' },
     librarian: { model: 'anthropic/claude-sonnet-4-5', variant: 'low' },
     explorer: { model: 'anthropic/claude-haiku-4-5', variant: 'low' },
     designer: { model: 'anthropic/claude-sonnet-4-5', variant: 'medium' },
@@ -41,7 +37,6 @@ export const MODEL_MAPPINGS = {
   },
   copilot: {
     orchestrator: { model: 'github-copilot/grok-code-fast-1' },
-    oracle: { model: 'github-copilot/grok-code-fast-1', variant: 'high' },
     librarian: { model: 'github-copilot/grok-code-fast-1', variant: 'low' },
     explorer: { model: 'github-copilot/grok-code-fast-1', variant: 'low' },
     designer: { model: 'github-copilot/grok-code-fast-1', variant: 'medium' },
@@ -49,7 +44,6 @@ export const MODEL_MAPPINGS = {
   },
   'zai-plan': {
     orchestrator: { model: 'zai-coding-plan/glm-4.7' },
-    oracle: { model: 'zai-coding-plan/glm-4.7', variant: 'high' },
     librarian: { model: 'zai-coding-plan/glm-4.7', variant: 'low' },
     explorer: { model: 'zai-coding-plan/glm-4.7', variant: 'low' },
     designer: { model: 'zai-coding-plan/glm-4.7', variant: 'medium' },
@@ -57,7 +51,6 @@ export const MODEL_MAPPINGS = {
   },
   antigravity: {
     orchestrator: { model: 'google/antigravity-gemini-3-flash' },
-    oracle: { model: 'google/antigravity-gemini-3.1-pro' },
     librarian: {
       model: 'google/antigravity-gemini-3-flash',
       variant: 'low',
@@ -74,7 +67,6 @@ export const MODEL_MAPPINGS = {
   },
   chutes: {
     orchestrator: { model: 'chutes/kimi-k2.5' },
-    oracle: { model: 'chutes/kimi-k2.5', variant: 'high' },
     librarian: { model: 'chutes/minimax-m2.1', variant: 'low' },
     explorer: { model: 'chutes/minimax-m2.1', variant: 'low' },
     designer: { model: 'chutes/kimi-k2.5', variant: 'medium' },
@@ -82,7 +74,6 @@ export const MODEL_MAPPINGS = {
   },
   'zen-free': {
     orchestrator: { model: 'opencode/big-pickle' },
-    oracle: { model: 'opencode/big-pickle', variant: 'high' },
     librarian: { model: 'opencode/big-pickle', variant: 'low' },
     explorer: { model: 'opencode/big-pickle', variant: 'low' },
     designer: { model: 'opencode/big-pickle', variant: 'medium' },
@@ -154,16 +145,6 @@ export function generateAntigravityMixedPreset(
     );
   }
 
-  // Oracle: GPT if hasOpenAI, else keep existing if exists, else antigravity
-  if (config.hasOpenAI) {
-    result.oracle = createAgentConfig('oracle', MODEL_MAPPINGS.openai.oracle);
-  } else if (!result.oracle) {
-    result.oracle = createAgentConfig(
-      'oracle',
-      MODEL_MAPPINGS.antigravity.oracle,
-    );
-  }
-
   // Explorer stays flash-first for speed.
   result.explorer = createAgentConfig('explorer', {
     ...antigravityFlash,
@@ -194,7 +175,7 @@ export function generateAntigravityMixedPreset(
   // Fixer prefers OpenAI codex when available.
   if (config.hasOpenAI) {
     result.fixer = createAgentConfig('fixer', {
-      ...MODEL_MAPPINGS.openai.oracle,
+      ...MODEL_MAPPINGS.openai.orchestrator,
       variant: 'low',
     });
   } else if (config.hasChutes) {
@@ -399,7 +380,6 @@ export function generateLiteConfig(
 
     if (!hasExternalProviders) {
       setAgent('orchestrator', primaryModel);
-      setAgent('oracle', primaryModel);
       setAgent('designer', primaryModel);
     }
 
@@ -432,7 +412,6 @@ export function generateLiteConfig(
     };
 
     setAgent('orchestrator', primaryModel);
-    setAgent('oracle', primaryModel);
     setAgent('designer', primaryModel);
     setAgent('librarian', secondaryModel);
     setAgent('explorer', secondaryModel);
@@ -535,16 +514,7 @@ export function generateLiteConfig(
     const mapping = MODEL_MAPPINGS[mappingName];
     return Object.fromEntries(
       Object.entries(mapping).map(([agentName, modelInfo]) => {
-        let activeModelInfo = { ...modelInfo };
-
-        // Hybrid case: Kimi + OpenAI (use OpenAI for Oracle, Kimi for orchestrator/designer)
-        if (
-          activePreset === 'kimi' &&
-          installConfig.hasOpenAI &&
-          agentName === 'oracle'
-        ) {
-          activeModelInfo = { ...MODEL_MAPPINGS.openai.oracle };
-        }
+        const activeModelInfo = { ...modelInfo };
 
         return [agentName, createAgentConfig(agentName, activeModelInfo)];
       }),

@@ -32,13 +32,6 @@ function buildDefaultUserConfig(): PluginConfig {
           skills: ['*'],
           mcps: DEFAULT_AGENT_MCPS.orchestrator,
         },
-        oracle: {
-          model: DEFAULT_MODELS.oracle,
-          temperature: DEFAULT_AGENT_TEMPERATURES.oracle,
-          // Permission-only skill; this just grants OpenCode permission.
-          skills: ['requesting-code-review'],
-          mcps: DEFAULT_AGENT_MCPS.oracle,
-        },
         designer: {
           model: DEFAULT_MODELS.designer,
           temperature: DEFAULT_AGENT_TEMPERATURES.designer,

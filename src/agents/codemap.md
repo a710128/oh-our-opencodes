@@ -30,7 +30,7 @@ All agents follow a consistent factory pattern:
 **Subagents** (5 specialized agents)
 1. **Explorer** - Codebase navigation and search (temperature: 0.1)
 2. **Librarian** - Documentation and library research (temperature: 0.1)
-3. **Oracle** - Strategic technical advisor (temperature: 0.1)
+3. **Librarian** - Documentation/research specialist (temperature: 0.1)
 4. **Designer** - UI/UX specialist (temperature: 0.7)
 5. **Fixer** - Fast implementation specialist (temperature: 0.2)
 
@@ -57,7 +57,7 @@ All agents follow a consistent factory pattern:
 |-------|--------------|-------|-------------|-------------|
 | Explorer | Codebase search | grep, glob, ast_grep_search | Read-only, parallel | 0.1 |
 | Librarian | External docs | context7, grep_app, websearch | Evidence-based | 0.1 |
-| Oracle | Architecture | Analysis tools | Read-only, advisory | 0.1 |
+| Librarian | Documentation | Research tools | Read-only | 0.1 |
 | Designer | UI/UX | Tailwind, CSS | Visual excellence | 0.7 |
 | Fixer | Implementation | Edit/write tools | No research/delegation | 0.2 |
 
@@ -120,7 +120,7 @@ Delegation Check
     │
     ├─→ Need to discover unknowns? → @explorer
     ├─→ Complex/evolving APIs? → @librarian
-    ├─→ High-stakes decisions? → @oracle
+    ├─→ High-stakes decisions? → (handled by orchestrator)
     ├─→ User-facing polish? → @designer
     ├─→ Clear spec, parallel tasks? → @fixer
     └─→ Simple/quick? → Do yourself
@@ -154,7 +154,7 @@ Fixer (implement changes)
 ```
 Orchestrator
     ↓ delegates to
-Oracle (architecture decision)
+Orchestrator (architecture decision)
     ↓ provides guidance to
 Orchestrator (implements or delegates to Fixer)
 ```
@@ -228,7 +228,7 @@ Agents are configured with specific MCP tool lists:
 
 1. **Factory Pattern**: Consistent agent creation with customization hooks
 2. **Temperature Gradient**: 0.1 (precision) → 0.7 (creativity) based on role
-3. **Read-Only Specialists**: Explorer, Librarian, Oracle don't modify code
+3. **Read-Only Specialists**: Explorer and Librarian don't modify code
 4. **Execution Specialist**: Fixer is the only agent that makes code changes
 5. **Fallback Model**: Fixer inherits Librarian's model for backward compatibility
 6. **Permission Defaults**: All agents get `question: 'allow'` for smooth UX
@@ -245,7 +245,6 @@ src/agents/
 ├── orchestrator.ts   # Orchestrator agent definition and delegation workflow
 ├── explorer.ts       # Codebase navigation specialist
 ├── librarian.ts      # Documentation and library research specialist
-├── oracle.ts         # Strategic technical advisor
 ├── fixer.ts          # Fast implementation specialist
 └── designer.ts       # UI/UX design specialist
 ```

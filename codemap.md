@@ -5,7 +5,7 @@
 **oh-our-opencodes** is a lightweight agent orchestration plugin for OpenCode. It provides a multi-agent system that enables specialized AI agents to work together under an orchestrator to optimize coding tasks for quality, speed, cost, and reliability.
 
 The plugin integrates with OpenCode to provide:
-- **Multi-agent orchestration** with specialized roles (Orchestrator, Explorer, Librarian, Oracle, Designer, Fixer)
+- **Multi-agent orchestration** with specialized roles (Orchestrator, Explorer, Librarian, Designer, Fixer)
 - **Background task management** for long-running async operations
 - **MCP (Model Context Protocol) integration** for external tools and services
 - **LSP (Language Server Protocol) tools** for code intelligence

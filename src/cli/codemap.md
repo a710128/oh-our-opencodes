@@ -125,7 +125,7 @@ Standardized result type for configuration operations.
 
 3. **Provider Priority** (`providers.ts`):
    - Kimi > OpenAI > Zen-free (fallback)
-   - Hybrid mode: Kimi for orchestrator/designer, OpenAI for oracle
+   - Hybrid mode: Kimi for orchestrator, OpenAI for fallback/implementation agents
 
 4. **Skill Permission Model** (`skills.ts`):
    - Orchestrator gets `*` (all skills)
@@ -249,8 +249,8 @@ generateLiteConfig() [providers.ts]
                   │
                   ▼
 ┌─────────────────────────────────────────┐
-│ For each agent (orchestrator, oracle,   │
-│ librarian, explorer, designer, fixer):  │
+│ For each agent (orchestrator,          │
+│ librarian, explorer, designer, fixer): │
 │                                         │
 │ 1. Get model from MODEL_MAPPINGS        │
 │ 2. Apply hybrid logic (if needed)       │

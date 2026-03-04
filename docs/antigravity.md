@@ -86,22 +86,18 @@ When you install with `--antigravity=yes`, the preset depends on other providers
 
 ### antigravity-mixed-both (Kimi + OpenAI + Antigravity)
 - **Orchestrator**: Kimi k2p5
-- **Oracle**: OpenAI model
 - **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
 
 ### antigravity-mixed-kimi (Kimi + Antigravity)
 - **Orchestrator**: Kimi k2p5
-- **Oracle**: Gemini 3.1 Pro (Antigravity)
 - **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
 
 ### antigravity-mixed-openai (OpenAI + Antigravity)
 - **Orchestrator**: Gemini 3 Flash (Antigravity)
-- **Oracle**: OpenAI model
 - **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
 
 ### antigravity (Pure Antigravity)
 - **Orchestrator**: Gemini 3 Flash (Antigravity)
-- **Oracle**: Gemini 3.1 Pro (Antigravity)
 - **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
 
 ## Manual Configuration
@@ -117,11 +113,6 @@ If you prefer to configure manually, edit `~/.config/opencode/oh-our-opencodes.j
         "model": "google/antigravity-gemini-3-flash",
         "skills": ["*"],
         "mcps": ["websearch"]
-      },
-      "oracle": {
-        "model": "google/antigravity-gemini-3.1-pro",
-        "skills": [],
-        "mcps": []
       },
       "explorer": {
         "model": "google/antigravity-gemini-3-flash",

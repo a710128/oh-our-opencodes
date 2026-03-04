@@ -11,7 +11,6 @@ import type {
 
 const AGENTS = [
   'orchestrator',
-  'oracle',
   'designer',
   'explorer',
   'librarian',
@@ -29,7 +28,6 @@ export type V1RankedScore = {
 
 const FREE_BIASED_PROVIDERS = new Set(['opencode']);
 const PRIMARY_ASSIGNMENT_ORDER: AgentName[] = [
-  'oracle',
   'orchestrator',
   'fixer',
   'designer',
@@ -39,7 +37,6 @@ const PRIMARY_ASSIGNMENT_ORDER: AgentName[] = [
 
 const ROLE_VARIANT: Record<AgentName, string | undefined> = {
   orchestrator: undefined,
-  oracle: 'high',
   designer: 'medium',
   explorer: 'low',
   librarian: 'low',
@@ -271,7 +268,6 @@ function chutesPreferenceAdjustment(
   const isMinimaxM21 = /minimax[-_ ]?m2\.1/.test(lowered);
 
   const qwenPenalty: Record<AgentName, number> = {
-    oracle: -12,
     orchestrator: -10,
     fixer: -22,
     designer: -14,
@@ -279,7 +275,6 @@ function chutesPreferenceAdjustment(
     explorer: -10,
   };
   const kimiBonus: Record<AgentName, number> = {
-    oracle: 0,
     orchestrator: 0,
     fixer: 8,
     designer: 6,
@@ -287,7 +282,6 @@ function chutesPreferenceAdjustment(
     explorer: 4,
   };
   const minimaxBonus: Record<AgentName, number> = {
-    oracle: 0,
     orchestrator: 0,
     fixer: 10,
     designer: 3,
@@ -380,24 +374,6 @@ function roleScore(
       deep * 10 +
       code * 8 +
       context +
-      flashAdjustment +
-      zaiAdjustment +
-      nonReasoningFlashPenalty +
-      geminiAdjustment +
-      chutesAdjustment +
-      providerBias
-    );
-  }
-  if (agent === 'oracle') {
-    const flashAdjustment = flash ? -34 : 0;
-    const zaiAdjustment = zai47NonFlash ? 16 : zai47Flash ? -18 : 0;
-    const nonReasoningFlashPenalty = flash && !model.reasoning ? -16 : 0;
-    return (
-      score +
-      reasoning * 55 +
-      deep * 18 +
-      context * 1.2 +
-      toolcall * 10 +
       flashAdjustment +
       zaiAdjustment +
       nonReasoningFlashPenalty +
@@ -806,7 +782,7 @@ function chooseProviderRepresentative(
 }
 
 function getQualityWindow(agent: AgentName): number {
-  if (agent === 'oracle' || agent === 'orchestrator') return 12;
+  if (agent === 'orchestrator') return 12;
   if (agent === 'fixer') return 15;
   if (agent === 'designer') return 16;
   if (agent === 'librarian') return 18;
@@ -848,7 +824,7 @@ function getProviderBundle(
   const includeSecond =
     representative.providerID === 'chutes' ||
     gap <=
-      (agent === 'oracle' || agent === 'orchestrator'
+      (agent === 'orchestrator'
         ? 8
         : agent === 'designer' || agent === 'librarian'
           ? 12

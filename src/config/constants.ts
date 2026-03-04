@@ -7,7 +7,6 @@ export const AGENT_ALIASES: Record<string, string> = {
 export const SUBAGENT_NAMES = [
   'explorer',
   'librarian',
-  'oracle',
   'designer',
   'fixer',
 ] as const;
@@ -23,7 +22,7 @@ export type AgentName = (typeof ALL_AGENT_NAMES)[number];
 // orchestrator: can spawn all subagents (full delegation)
 // fixer: leaf node — prompt forbids delegation; use grep/glob for lookups
 // designer: can spawn explorer (for research during design)
-// explorer/librarian/oracle: cannot spawn any subagents (leaf nodes)
+// explorer/librarian: cannot spawn any subagents (leaf nodes)
 // Unknown agent types not listed here default to explorer-only access
 export const SUBAGENT_DELEGATION_RULES: Record<AgentName, readonly string[]> = {
   orchestrator: SUBAGENT_NAMES,
@@ -31,13 +30,11 @@ export const SUBAGENT_DELEGATION_RULES: Record<AgentName, readonly string[]> = {
   designer: [],
   explorer: [],
   librarian: [],
-  oracle: [],
 };
 
 // Default models for each agent
 export const DEFAULT_MODELS: Record<AgentName, string> = {
   orchestrator: 'kimi-for-coding/k2p5',
-  oracle: 'openai/gpt-5.2-codex',
   librarian: 'openai/gpt-5.1-codex-mini',
   explorer: 'openai/gpt-5.1-codex-mini',
   designer: 'kimi-for-coding/k2p5',
@@ -48,7 +45,6 @@ export const DEFAULT_MODELS: Record<AgentName, string> = {
 // and template generation).
 export const DEFAULT_AGENT_TEMPERATURES: Record<AgentName, number> = {
   orchestrator: 0.1,
-  oracle: 0.1,
   librarian: 0.1,
   explorer: 0.1,
   designer: 0.7,
@@ -59,7 +55,6 @@ export const DEFAULT_AGENT_TEMPERATURES: Record<AgentName, number> = {
 export const DEFAULT_AGENT_MCPS: Record<AgentName, string[]> = {
   orchestrator: ['websearch'],
   designer: [],
-  oracle: [],
   librarian: ['websearch', 'context7', 'grep_app'],
   explorer: [],
   fixer: [],

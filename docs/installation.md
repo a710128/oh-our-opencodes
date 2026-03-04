@@ -101,7 +101,7 @@ Help the user understand the tradeoffs:
 - OpenCode-only mode can assign more than one OpenCode model across agents.
 - Hybrid mode can combine OpenCode free models with OpenAI, Kimi, and/or Antigravity.
 - In hybrid mode, `designer` remains on the external provider mapping.
-- Chutes selection prioritizes stronger models for orchestrator/oracle and higher-cap models for support agents.
+- Chutes selection prioritizes stronger models for the orchestrator and higher-cap models for support agents.
 - Kimi For Coding provides powerful coding models.
 - OpenAI enables `openai/` models.
 - Antigravity (Google) provides Claude and Gemini models via Google infrastructure.

@@ -62,12 +62,7 @@ export const RECOMMENDED_SKILLS: RecommendedSkill[] = [
  * Entries here only affect agent permission grants — nothing is installed.
  */
 export const PERMISSION_ONLY_SKILLS: PermissionOnlySkill[] = [
-  {
-    name: 'requesting-code-review',
-    allowedAgents: ['oracle'],
-    description:
-      'Code review template for reviewer subagents in multi-step workflows',
-  },
+  // Intentionally empty; keep the mechanism for future permission-only skills.
 ];
 
 /**

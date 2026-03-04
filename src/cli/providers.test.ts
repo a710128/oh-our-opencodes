@@ -47,9 +47,6 @@ describe('providers', () => {
     expect(agents).toBeDefined();
     expect(agents.orchestrator.model).toBe('kimi-for-coding/k2p5');
     expect(agents.orchestrator.variant).toBeUndefined();
-    // Oracle uses OpenAI when both kimi and openai are enabled
-    expect(agents.oracle.model).toBe('openai/gpt-5.3-codex');
-    expect(agents.oracle.variant).toBe('high');
     // Should NOT include other presets
     expect((config.presets as any).openai).toBeUndefined();
     expect((config.presets as any)['zen-free']).toBeUndefined();
@@ -96,7 +93,6 @@ describe('providers', () => {
     const agents = (config.presets as any).chutes;
     expect(agents).toBeDefined();
     expect(agents.orchestrator.model).toBe('chutes/kimi-k2.5');
-    expect(agents.oracle.model).toBe('chutes/kimi-k2.5');
     expect(agents.designer.model).toBe('chutes/kimi-k2.5');
     expect(agents.explorer.model).toBe('chutes/minimax-m2.1');
     expect(agents.librarian.model).toBe('chutes/minimax-m2.1');
@@ -121,7 +117,6 @@ describe('providers', () => {
     expect(config.preset).toBe('anthropic');
     const agents = (config.presets as any).anthropic;
     expect(agents.orchestrator.model).toBe('anthropic/claude-opus-4-6');
-    expect(agents.oracle.model).toBe('anthropic/claude-opus-4-6');
     expect(agents.explorer.model).toBe('anthropic/claude-haiku-4-5');
   });
 
@@ -145,11 +140,10 @@ describe('providers', () => {
     expect(config.preset).toBe('antigravity-mixed-openai');
     const agents = (config.presets as any)['antigravity-mixed-openai'];
     expect(agents.orchestrator.model).toBe('chutes/kimi-k2.5');
-    expect(agents.oracle.model).toBe('openai/gpt-5.3-codex');
     expect(agents.explorer.model).toBe('opencode/gpt-5-nano');
   });
 
-  test('generateLiteConfig emits fallback chains for six agents', () => {
+  test('generateLiteConfig emits fallback chains for five agents', () => {
     const config = generateLiteConfig({
       hasAntigravity: true,
       hasKimi: true,
@@ -174,7 +168,6 @@ describe('providers', () => {
       'explorer',
       'fixer',
       'librarian',
-      'oracle',
       'orchestrator',
     ]);
     expect(chains.orchestrator).toContain('openai/gpt-5.3-codex');
@@ -219,8 +212,6 @@ describe('providers', () => {
     expect(config.preset).toBe('zen-free');
     const agents = (config.presets as any)['zen-free'];
     expect(agents.orchestrator.model).toBe('opencode/big-pickle');
-    expect(agents.oracle.model).toBe('opencode/big-pickle');
-    expect(agents.oracle.variant).toBe('high');
     expect(agents.librarian.model).toBe('opencode/big-pickle');
     expect(agents.librarian.variant).toBe('low');
   });
@@ -298,7 +289,6 @@ describe('providers', () => {
     expect(agents.orchestrator.model).toBe(
       MODEL_MAPPINGS.openai.orchestrator.model,
     );
-    expect(agents.oracle.model).toBe(MODEL_MAPPINGS.openai.oracle.model);
     expect(agents.explorer.model).toBe('opencode/gpt-5-nano');
     expect(agents.librarian.model).toBe('opencode/gpt-5-nano');
     expect(agents.fixer.model).toBe('opencode/gpt-5-nano');
@@ -320,7 +310,6 @@ describe('providers', () => {
 
     const agents = (config.presets as any)['zen-free'];
     expect(agents.orchestrator.model).toBe('opencode/glm-4.7-free');
-    expect(agents.oracle.model).toBe('opencode/glm-4.7-free');
     expect(agents.designer.model).toBe('opencode/glm-4.7-free');
     expect(agents.explorer.model).toBe('opencode/gpt-5-nano');
     expect(agents.librarian.model).toBe('opencode/gpt-5-nano');
@@ -366,10 +355,6 @@ describe('providers', () => {
       // Orchestrator should use Kimi
       expect(agents.orchestrator.model).toBe('kimi-for-coding/k2p5');
 
-      // Oracle should use OpenAI
-      expect(agents.oracle.model).toBe('openai/gpt-5.3-codex');
-      expect(agents.oracle.variant).toBe('high');
-
       // Explorer/Librarian/Designer use Antigravity Flash; Fixer prefers OpenAI
       expect(agents.explorer.model).toBe('google/antigravity-gemini-3-flash');
       expect(agents.explorer.variant).toBe('low');
@@ -399,9 +384,6 @@ describe('providers', () => {
       // Orchestrator should use Kimi
       expect(agents.orchestrator.model).toBe('kimi-for-coding/k2p5');
 
-      // Oracle should use Antigravity (no OpenAI)
-      expect(agents.oracle.model).toBe('google/antigravity-gemini-3.1-pro');
-
       // Others should use Antigravity Flash
       expect(agents.explorer.model).toBe('google/antigravity-gemini-3-flash');
       expect(agents.librarian.model).toBe('google/antigravity-gemini-3-flash');
@@ -429,10 +411,6 @@ describe('providers', () => {
         'google/antigravity-gemini-3-flash',
       );
 
-      // Oracle should use OpenAI
-      expect(agents.oracle.model).toBe('openai/gpt-5.3-codex');
-      expect(agents.oracle.variant).toBe('high');
-
       // Explorer/Librarian/Designer use Antigravity Flash; Fixer prefers OpenAI
       expect(agents.explorer.model).toBe('google/antigravity-gemini-3-flash');
       expect(agents.librarian.model).toBe('google/antigravity-gemini-3-flash');
@@ -459,7 +437,6 @@ describe('providers', () => {
       expect(agents.orchestrator.model).toBe(
         'google/antigravity-gemini-3-flash',
       );
-      expect(agents.oracle.model).toBe('google/antigravity-gemini-3.1-pro');
       expect(agents.explorer.model).toBe('google/antigravity-gemini-3-flash');
       expect(agents.librarian.model).toBe('google/antigravity-gemini-3-flash');
       expect(agents.designer.model).toBe('google/antigravity-gemini-3-flash');
@@ -478,21 +455,6 @@ describe('providers', () => {
       });
 
       expect((preset.orchestrator as any).model).toBe('kimi-for-coding/k2p5');
-    });
-
-    test('generateAntigravityMixedPreset respects OpenAI for oracle', () => {
-      const preset = generateAntigravityMixedPreset({
-        hasKimi: false,
-        hasOpenAI: true,
-        hasAntigravity: true,
-        hasOpencodeZen: false,
-        hasTmux: false,
-        installSkills: false,
-        installCustomSkills: false,
-      });
-
-      expect((preset.oracle as any).model).toBe('openai/gpt-5.3-codex');
-      expect((preset.oracle as any).variant).toBe('high');
     });
 
     test('generateAntigravityMixedPreset uses OpenAI fixer and Antigravity support defaults', () => {

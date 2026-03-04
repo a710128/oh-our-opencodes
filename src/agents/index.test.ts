@@ -142,6 +142,22 @@ describe('orchestrator agent', () => {
   });
 });
 
+describe('question permissions', () => {
+  test('explorer has question permission set to deny', () => {
+    const agents = createAgents();
+    const explorer = agents.find((a) => a.name === 'explorer');
+    expect(explorer?.config.permission).toBeDefined();
+    expect((explorer?.config.permission as any).question).toBe('deny');
+  });
+
+  test('fixer has question permission set to deny', () => {
+    const agents = createAgents();
+    const fixer = agents.find((a) => a.name === 'fixer');
+    expect(fixer?.config.permission).toBeDefined();
+    expect((fixer?.config.permission as any).question).toBe('deny');
+  });
+});
+
 describe('skill permissions', () => {
   test('orchestrator allows skill wildcard by default', () => {
     const agents = createAgents();
@@ -162,21 +178,13 @@ describe('skill permissions', () => {
     expect(skillPerm?.['*']).toBe('deny');
   });
 
-  test('oracle gets requesting-code-review skill allowed by default', () => {
-    const agents = createAgents();
-    const oracle = agents.find((a) => a.name === 'oracle');
-    expect(oracle).toBeDefined();
-    const skillPerm = (oracle?.config.permission as Record<string, unknown>)
-      ?.skill as Record<string, string>;
-    expect(skillPerm?.['requesting-code-review']).toBe('allow');
-  });
+  // No dedicated reviewer agent is shipped in this fork.
 });
 
 describe('isSubagent type guard', () => {
   test('returns true for valid subagent names', () => {
     expect(isSubagent('explorer')).toBe(true);
     expect(isSubagent('librarian')).toBe(true);
-    expect(isSubagent('oracle')).toBe(true);
     expect(isSubagent('designer')).toBe(true);
     expect(isSubagent('fixer')).toBe(true);
   });
@@ -219,14 +227,13 @@ describe('createAgents', () => {
     expect(names).toContain('orchestrator');
     expect(names).toContain('explorer');
     expect(names).toContain('designer');
-    expect(names).toContain('oracle');
     expect(names).toContain('librarian');
     expect(names).toContain('fixer');
   });
 
-  test('creates exactly 6 agents (1 primary + 5 subagents)', () => {
+  test('creates exactly 5 agents (1 primary + 4 subagents)', () => {
     const agents = createAgents();
-    expect(agents.length).toBe(6);
+    expect(agents.length).toBe(5);
   });
 });
 

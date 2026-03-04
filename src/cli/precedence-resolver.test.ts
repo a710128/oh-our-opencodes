@@ -6,7 +6,7 @@ import { resolveAgentWithPrecedence } from './precedence-resolver';
 describe('precedence-resolver', () => {
   test('resolves deterministic winner with provenance', () => {
     const result = resolveAgentWithPrecedence({
-      agentName: 'oracle',
+      agentName: 'orchestrator',
       manualUserPlan: ['openai/gpt-5.3-codex', 'openai/gpt-5.1-codex-mini'],
       dynamicRecommendation: ['anthropic/claude-opus-4-6'],
       providerFallbackPolicy: ['chutes/kimi-k2.5'],

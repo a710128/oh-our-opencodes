@@ -4,11 +4,11 @@ import { log } from './logger';
 /**
  * Normalizes an agent name by trimming whitespace and removing the optional @ prefix.
  *
- * @param agentName - The agent name to normalize (e.g., "@oracle" or "oracle")
+ * @param agentName - The agent name to normalize (e.g., "@designer" or "designer")
  * @returns The normalized agent name without @ prefix and trimmed of whitespace
  *
  * @example
- * normalizeAgentName("@oracle") // returns "oracle"
+ * normalizeAgentName("@designer") // returns "designer"
  * normalizeAgentName("  explore  ") // returns "explore"
  */
 export function normalizeAgentName(agentName: string): string {
@@ -30,7 +30,7 @@ export function normalizeAgentName(agentName: string): string {
  * @returns The trimmed variant string, or undefined if no valid variant is found
  *
  * @example
- * resolveAgentVariant(config, "@oracle") // returns "high" if configured
+ * resolveAgentVariant(config, "@designer") // returns "high" if configured
  */
 export function resolveAgentVariant(
   config: PluginConfig | undefined,
@@ -64,8 +64,8 @@ export function resolveAgentVariant(
  * @returns The body with the variant applied (new object) or the original body unchanged
  *
  * @example
- * applyAgentVariant("high", { agent: "oracle" }) // returns { agent: "oracle", variant: "high" }
- * applyAgentVariant("high", { agent: "oracle", variant: "low" }) // returns original body with variant: "low"
+ * applyAgentVariant("high", { agent: "designer" }) // returns { agent: "designer", variant: "high" }
+ * applyAgentVariant("high", { agent: "designer", variant: "low" }) // returns original body with variant: "low"
  */
 export function applyAgentVariant<T extends { variant?: string }>(
   variant: string | undefined,

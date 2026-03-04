@@ -38,8 +38,8 @@ describe('scoring-v2', () => {
       },
     };
 
-    const first = scoreCandidateV2(candidate, 'oracle', signalMap);
-    const second = scoreCandidateV2(candidate, 'oracle', signalMap);
+    const first = scoreCandidateV2(candidate, 'orchestrator', signalMap);
+    const second = scoreCandidateV2(candidate, 'orchestrator', signalMap);
 
     expect(first.totalScore).toBe(second.totalScore);
     expect(first.scoreBreakdown.features.quality).toBe(0.7);

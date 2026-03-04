@@ -118,38 +118,7 @@ https://raw.githubusercontent.com/a710128/oh-our-opencodes/refs/heads/master/REA
 
 ---
 
-### 03. Oracle: The Guardian of Paths
-
-<table>
-  <tr>
-    <td width="30%" align="center" valign="top">
-      <img src="img/oracle.png" width="240" style="border-radius: 10px;">
-      <br><sub><i>The voice at the crossroads.</i></sub>
-    </td>
-    <td width="70%" valign="top">
-      The Oracle stands at the crossroads of every architectural decision. They have walked every road, seen every destination, know every trap that lies ahead. When you stand at the precipice of a major refactor, they are the voice that whispers which way leads to ruin and which way leads to glory. They don't choose for you - they illuminate the path so you can choose wisely.
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2">
-      <b>Role:</b> <code>Strategic advisor and debugger of last resort</code>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2">
-      <b>Prompt:</b> <a href="src/agents/oracle.ts"><code>oracle.ts</code></a>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2">
-      <b>Recommended Models:</b> <code>openai/gpt-5.2-codex</code> <code>kimi-for-coding/k2p5</code>
-    </td>
-  </tr>
-</table>
-
----
-
-### 04. Librarian: The Weaver of Knowledge
+### 03. Librarian: The Weaver of Knowledge
 
 <table>
   <tr>
@@ -180,7 +149,7 @@ https://raw.githubusercontent.com/a710128/oh-our-opencodes/refs/heads/master/REA
 
 ---
 
-### 05. Designer: The Guardian of Aesthetics
+### 04. Designer: The Guardian of Aesthetics
 
 <table>
   <tr>
@@ -211,7 +180,7 @@ https://raw.githubusercontent.com/a710128/oh-our-opencodes/refs/heads/master/REA
 
 ---
 
-### 06. Fixer: The Last Builder
+### 05. Fixer: The Last Builder
 
 <table>
   <tr>

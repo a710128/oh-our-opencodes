@@ -19,7 +19,6 @@ export type FeatureWeights = Record<ScoreFeatureName, number>;
 
 export type ScoringAgentName =
   | 'orchestrator'
-  | 'oracle'
   | 'designer'
   | 'explorer'
   | 'librarian'

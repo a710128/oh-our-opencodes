@@ -50,7 +50,7 @@ function baseInstallConfig(): InstallConfig {
 }
 
 describe('dynamic-model-selection', () => {
-  test('builds assignments and chains for all six agents', () => {
+  test('builds assignments and chains for all shipped agents', () => {
     const plan = buildDynamicModelPlan(
       [
         m({ model: 'openai/gpt-5.3-codex', reasoning: true, toolcall: true }),
@@ -84,18 +84,13 @@ describe('dynamic-model-selection', () => {
       'explorer',
       'fixer',
       'librarian',
-      'oracle',
       'orchestrator',
     ]);
-    expect(agents.oracle?.model.startsWith('opencode/')).toBe(false);
     expect(agents.orchestrator?.model.startsWith('opencode/')).toBe(false);
-    expect(chains.oracle.some((m: string) => m.startsWith('openai/'))).toBe(
-      true,
-    );
     expect(chains.orchestrator).toContain('chutes/kimi-k2.5');
     expect(chains.explorer).toContain('opencode/gpt-5-nano');
     expect(chains.fixer[chains.fixer.length - 1]).toBe('opencode/gpt-5-nano');
-    expect(plan?.provenance?.oracle?.winnerLayer).toBe(
+    expect(plan?.provenance?.orchestrator?.winnerLayer).toBe(
       'dynamic-recommendation',
     );
     expect(plan?.scoring?.engineVersionApplied).toBe('v1');
@@ -116,7 +111,7 @@ describe('dynamic-model-selection', () => {
     expect(plan).not.toBeNull();
     expect(plan?.scoring?.engineVersionApplied).toBe('v1');
     expect(plan?.scoring?.shadowCompared).toBe(true);
-    expect(plan?.scoring?.diffs?.oracle).toBeDefined();
+    expect(plan?.scoring?.diffs?.orchestrator).toBeDefined();
   });
 
   test('balances provider usage when subscription mode is enabled', () => {
@@ -169,7 +164,7 @@ describe('dynamic-model-selection', () => {
     );
 
     expect(usage.openai).toBe(2);
-    expect(usage['zai-coding-plan']).toBe(2);
+    expect(usage['zai-coding-plan']).toBe(1);
     expect(usage.chutes).toBe(2);
   });
 
@@ -225,12 +220,10 @@ describe('dynamic-model-selection', () => {
       m({ model: 'openai/gpt-5.3-codex', reasoning: true, toolcall: true }),
     ];
 
-    const oracle = rankModelsV1WithBreakdown(catalog, 'oracle');
     const orchestrator = rankModelsV1WithBreakdown(catalog, 'orchestrator');
     const designer = rankModelsV1WithBreakdown(catalog, 'designer');
     const librarian = rankModelsV1WithBreakdown(catalog, 'librarian');
 
-    expect(oracle[0]?.model).toBe('openai/gpt-5.3-codex');
     expect(orchestrator[0]?.model).toBe('openai/gpt-5.3-codex');
     expect(designer[0]?.model).toBe('openai/gpt-5.3-codex');
     expect(librarian[0]?.model).toBe('openai/gpt-5.3-codex');

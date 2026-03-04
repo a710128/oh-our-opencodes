@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 const FALLBACK_AGENT_NAMES = [
   'orchestrator',
-  'oracle',
   'designer',
   'explorer',
   'librarian',
@@ -11,7 +10,6 @@ const FALLBACK_AGENT_NAMES = [
 
 const MANUAL_AGENT_NAMES = [
   'orchestrator',
-  'oracle',
   'designer',
   'explorer',
   'librarian',
@@ -50,7 +48,6 @@ export const ManualAgentPlanSchema = z
 export const ManualPlanSchema = z
   .object({
     orchestrator: ManualAgentPlanSchema,
-    oracle: ManualAgentPlanSchema,
     designer: ManualAgentPlanSchema,
     explorer: ManualAgentPlanSchema,
     librarian: ManualAgentPlanSchema,
@@ -67,7 +64,6 @@ const AgentModelChainSchema = z.array(z.string()).min(1);
 const FallbackChainsSchema = z
   .object({
     orchestrator: AgentModelChainSchema.optional(),
-    oracle: AgentModelChainSchema.optional(),
     designer: AgentModelChainSchema.optional(),
     explorer: AgentModelChainSchema.optional(),
     librarian: AgentModelChainSchema.optional(),
