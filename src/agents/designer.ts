@@ -1,3 +1,4 @@
+import { DEFAULT_AGENT_TEMPERATURES } from '../config/constants';
 import type { AgentDefinition } from './orchestrator';
 
 const DESIGNER_PROMPT = `You are a Designer - a frontend UI/UX specialist who creates intentional, polished experiences.
@@ -70,7 +71,7 @@ export function createDesignerAgent(
       'UI/UX design and implementation. Use for styling, responsive design, component architecture and visual polish.',
     config: {
       model,
-      temperature: 0.7,
+      temperature: DEFAULT_AGENT_TEMPERATURES.designer,
       prompt,
     },
   };

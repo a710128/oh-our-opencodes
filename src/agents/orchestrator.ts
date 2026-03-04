@@ -1,4 +1,5 @@
 import type { AgentConfig } from '@opencode-ai/sdk/v2';
+import { DEFAULT_AGENT_TEMPERATURES } from '../config/constants';
 
 export interface AgentDefinition {
   name: string;
@@ -159,7 +160,7 @@ export function createOrchestratorAgent(
       'AI coding orchestrator that delegates tasks to specialist agents for optimal quality, speed, and cost',
     config: {
       model,
-      temperature: 0.1,
+      temperature: DEFAULT_AGENT_TEMPERATURES.orchestrator,
       prompt,
     },
   };

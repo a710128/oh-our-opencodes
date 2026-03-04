@@ -1,20 +1,10 @@
 import {
   type AgentName,
+  DEFAULT_AGENT_MCPS,
   getAgentOverride,
   McpNameSchema,
   type PluginConfig,
 } from '.';
-
-/** Default MCPs per agent - "*" means all MCPs, "!item" excludes specific MCPs */
-
-export const DEFAULT_AGENT_MCPS: Record<AgentName, string[]> = {
-  orchestrator: ['websearch'],
-  designer: [],
-  oracle: [],
-  librarian: ['websearch', 'context7', 'grep_app'],
-  explorer: [],
-  fixer: [],
-};
 
 /**
  * Parse a list with wildcard and exclusion syntax.

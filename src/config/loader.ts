@@ -2,9 +2,95 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { stripJsonComments } from '../cli/config-io';
+import {
+  DEFAULT_AGENT_MCPS,
+  DEFAULT_AGENT_TEMPERATURES,
+  DEFAULT_BACKGROUND_CONFIG,
+  DEFAULT_FAILOVER_CONFIG,
+  DEFAULT_MODELS,
+  DEFAULT_TMUX_CONFIG,
+} from './constants';
 import { type PluginConfig, PluginConfigSchema } from './schema';
 
 const PROMPTS_DIR_NAME = 'oh-our-opencodes';
+const DEFAULT_PRESET_NAME = 'default';
+
+function buildDefaultUserConfig(): PluginConfig {
+  return {
+    preset: DEFAULT_PRESET_NAME,
+    // Explicit defaults are written to make the file easy to customize.
+    // Note: this may "pin" defaults that were previously implicit.
+    disabled_mcps: [],
+    tmux: { ...DEFAULT_TMUX_CONFIG },
+    background: { ...DEFAULT_BACKGROUND_CONFIG },
+    fallback: { ...DEFAULT_FAILOVER_CONFIG },
+    presets: {
+      [DEFAULT_PRESET_NAME]: {
+        orchestrator: {
+          model: DEFAULT_MODELS.orchestrator,
+          temperature: DEFAULT_AGENT_TEMPERATURES.orchestrator,
+          skills: ['*'],
+          mcps: DEFAULT_AGENT_MCPS.orchestrator,
+        },
+        oracle: {
+          model: DEFAULT_MODELS.oracle,
+          temperature: DEFAULT_AGENT_TEMPERATURES.oracle,
+          // Permission-only skill; this just grants OpenCode permission.
+          skills: ['requesting-code-review'],
+          mcps: DEFAULT_AGENT_MCPS.oracle,
+        },
+        designer: {
+          model: DEFAULT_MODELS.designer,
+          temperature: DEFAULT_AGENT_TEMPERATURES.designer,
+          skills: ['agent-browser'],
+          mcps: DEFAULT_AGENT_MCPS.designer,
+        },
+        explorer: {
+          model: DEFAULT_MODELS.explorer,
+          temperature: DEFAULT_AGENT_TEMPERATURES.explorer,
+          skills: ['cartography'],
+          mcps: DEFAULT_AGENT_MCPS.explorer,
+        },
+        librarian: {
+          model: DEFAULT_MODELS.librarian,
+          temperature: DEFAULT_AGENT_TEMPERATURES.librarian,
+          skills: [],
+          mcps: DEFAULT_AGENT_MCPS.librarian,
+        },
+        fixer: {
+          model: DEFAULT_MODELS.fixer,
+          temperature: DEFAULT_AGENT_TEMPERATURES.fixer,
+          skills: [],
+          mcps: DEFAULT_AGENT_MCPS.fixer,
+        },
+      },
+    },
+  };
+}
+
+/**
+ * Best-effort: if the user-level config doesn't exist, create a default one.
+ * This is intentionally non-fatal and never overwrites an existing file.
+ */
+function ensureDefaultUserConfig(userConfigBasePath: string): void {
+  const jsonPath = `${userConfigBasePath}.json`;
+  const jsoncPath = `${userConfigBasePath}.jsonc`;
+
+  // Respect any existing user config.
+  if (fs.existsSync(jsoncPath) || fs.existsSync(jsonPath)) return;
+
+  try {
+    fs.mkdirSync(path.dirname(jsonPath), { recursive: true });
+    const content = `${JSON.stringify(buildDefaultUserConfig(), null, 2)}\n`;
+    fs.writeFileSync(jsonPath, content, { flag: 'wx' });
+  } catch (error) {
+    // Best-effort only; avoid blocking plugin startup.
+    const msg = error instanceof Error ? error.message : String(error);
+    console.warn(
+      `[oh-our-opencodes] Failed to create default user config at ${jsonPath}: ${msg}`,
+    );
+  }
+}
 
 /**
  * Get the user's configuration directory following XDG Base Directory specification.
@@ -145,6 +231,13 @@ export function loadPluginConfig(directory: string): PluginConfig {
   // Find existing config files (preferring .jsonc over .json)
   const userConfigPath = findConfigPath(userConfigBasePath);
   const projectConfigPath = findConfigPath(projectConfigBasePath);
+
+  // If the user has never created a config, write a default one so they have a
+  // baseline to edit. Keep runtime behavior backward-compatible by not
+  // automatically loading it in this invocation.
+  if (!userConfigPath) {
+    ensureDefaultUserConfig(userConfigBasePath);
+  }
 
   let config: PluginConfig = userConfigPath
     ? (loadConfigFromPath(userConfigPath) ?? {})

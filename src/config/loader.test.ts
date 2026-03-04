@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { DEFAULT_MODELS } from './constants';
 import { loadAgentPrompt, loadPluginConfig } from './loader';
 
 // Test deepMerge indirectly through loadPluginConfig behavior
@@ -30,6 +31,26 @@ describe('loadPluginConfig', () => {
     fs.mkdirSync(projectDir, { recursive: true });
     const config = loadPluginConfig(projectDir);
     expect(config).toEqual({});
+
+    // Best-effort default user config is created for convenience.
+    const userOpencodeDir = path.join(userConfigDir, 'opencode');
+    const userConfigPath = path.join(userOpencodeDir, 'oh-our-opencodes.json');
+    expect(fs.existsSync(userConfigPath)).toBe(true);
+    const raw = JSON.parse(fs.readFileSync(userConfigPath, 'utf-8')) as {
+      preset?: string;
+      tmux?: { enabled?: boolean; layout?: string; main_pane_size?: number };
+      background?: { maxConcurrentStarts?: number };
+      fallback?: { enabled?: boolean; timeoutMs?: number; chains?: unknown };
+      presets?: Record<string, Record<string, { model?: string }>>;
+    };
+    expect(raw.preset).toBe('default');
+    expect(raw.tmux?.enabled).toBe(false);
+    expect(raw.background?.maxConcurrentStarts).toBe(10);
+    expect(raw.fallback?.enabled).toBe(true);
+    expect(raw.fallback?.timeoutMs).toBe(15000);
+    expect(raw.presets?.default?.orchestrator?.model).toBe(
+      DEFAULT_MODELS.orchestrator,
+    );
   });
 
   test('loads project config from .opencode directory', () => {
@@ -143,6 +164,7 @@ describe('loadPluginConfig', () => {
       path.join(projectConfigDir, 'oh-our-opencodes.json'),
       JSON.stringify({ agents: { oracle: { temperature: 5 } } }),
     );
+    // Invalid project config is ignored.
     expect(loadPluginConfig(projectDir)).toEqual({});
 
     // Test 2: Malformed JSON
@@ -150,7 +172,11 @@ describe('loadPluginConfig', () => {
       path.join(projectConfigDir, 'oh-our-opencodes.json'),
       '{ invalid json }',
     );
-    expect(loadPluginConfig(projectDir)).toEqual({});
+    // Malformed project config is ignored; the loader will have created a
+    // default user config during the prior call, so we now load that.
+    const config = loadPluginConfig(projectDir);
+    expect(config.preset).toBe('default');
+    expect(config.agents?.oracle?.model).toBe(DEFAULT_MODELS.oracle);
   });
 });
 

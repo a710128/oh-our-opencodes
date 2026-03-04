@@ -1,3 +1,4 @@
+import { DEFAULT_AGENT_TEMPERATURES } from '../config/constants';
 import type { AgentDefinition } from './orchestrator';
 
 const LIBRARIAN_PROMPT = `You are Librarian - a research specialist for codebases and documentation.
@@ -40,7 +41,7 @@ export function createLibrarianAgent(
       'External documentation and library research. Use for official docs lookup, GitHub examples, and understanding library internals.',
     config: {
       model,
-      temperature: 0.1,
+      temperature: DEFAULT_AGENT_TEMPERATURES.librarian,
       prompt,
     },
   };

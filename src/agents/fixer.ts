@@ -1,3 +1,4 @@
+import { DEFAULT_AGENT_TEMPERATURES } from '../config/constants';
 import type { AgentDefinition } from './orchestrator';
 
 const FIXER_PROMPT = `You are Fixer - a fast, focused implementation specialist.
@@ -60,7 +61,7 @@ export function createFixerAgent(
       'Fast implementation specialist. Receives complete context and task spec, executes code changes efficiently.',
     config: {
       model,
-      temperature: 0.2,
+      temperature: DEFAULT_AGENT_TEMPERATURES.fixer,
       prompt,
     },
   };

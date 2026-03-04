@@ -1,3 +1,4 @@
+import { DEFAULT_AGENT_TEMPERATURES } from '../config/constants';
 import type { AgentDefinition } from './orchestrator';
 
 const ORACLE_PROMPT = `You are Oracle - a strategic technical advisor.
@@ -40,7 +41,7 @@ export function createOracleAgent(
       'Strategic technical advisor. Use for architecture decisions, complex debugging, code review, and engineering guidance.',
     config: {
       model,
-      temperature: 0.1,
+      temperature: DEFAULT_AGENT_TEMPERATURES.oracle,
       prompt,
     },
   };

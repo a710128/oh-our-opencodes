@@ -44,6 +44,43 @@ export const DEFAULT_MODELS: Record<AgentName, string> = {
   fixer: 'openai/gpt-5.1-codex-mini',
 };
 
+// Default temperatures per agent (single source of truth for runtime defaults
+// and template generation).
+export const DEFAULT_AGENT_TEMPERATURES: Record<AgentName, number> = {
+  orchestrator: 0.1,
+  oracle: 0.1,
+  librarian: 0.1,
+  explorer: 0.1,
+  designer: 0.7,
+  fixer: 0.2,
+};
+
+// Default MCPs per agent - "*" means all MCPs, "!item" excludes specific MCPs.
+export const DEFAULT_AGENT_MCPS: Record<AgentName, string[]> = {
+  orchestrator: ['websearch'],
+  designer: [],
+  oracle: [],
+  librarian: ['websearch', 'context7', 'grep_app'],
+  explorer: [],
+  fixer: [],
+};
+
+export const DEFAULT_TMUX_CONFIG = {
+  enabled: false,
+  layout: 'main-vertical',
+  main_pane_size: 60,
+} as const;
+
+export const DEFAULT_BACKGROUND_CONFIG = {
+  maxConcurrentStarts: 10,
+} as const;
+
+export const DEFAULT_FAILOVER_CONFIG = {
+  enabled: true,
+  timeoutMs: 15000,
+  chains: {},
+} as const;
+
 // Polling configuration
 export const POLL_INTERVAL_MS = 500;
 export const POLL_INTERVAL_SLOW_MS = 1000;

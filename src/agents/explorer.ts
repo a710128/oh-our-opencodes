@@ -1,3 +1,4 @@
+import { DEFAULT_AGENT_TEMPERATURES } from '../config/constants';
 import type { AgentDefinition } from './orchestrator';
 
 const EXPLORER_PROMPT = `You are Explorer - a fast codebase navigation specialist.
@@ -58,7 +59,7 @@ export function createExplorerAgent(
       "Fast codebase search and pattern matching. Use for finding files, locating code patterns, and answering 'where is X?' questions.",
     config: {
       model,
-      temperature: 0.1,
+      temperature: DEFAULT_AGENT_TEMPERATURES.explorer,
       prompt,
     },
   };

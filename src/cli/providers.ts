@@ -1,4 +1,4 @@
-import { DEFAULT_AGENT_MCPS } from '../config/agent-mcps';
+import { DEFAULT_AGENT_MCPS } from '../config/constants';
 import { RECOMMENDED_SKILLS } from './skills';
 import type { InstallConfig } from './types';
 
