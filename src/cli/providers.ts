@@ -1,6 +1,19 @@
 import { DEFAULT_AGENT_MCPS } from '../config/constants';
+import { CUSTOM_SKILLS } from './custom-skills';
 import { RECOMMENDED_SKILLS } from './skills';
 import type { InstallConfig } from './types';
+
+function getDefaultSkillsForAgent(agentName: string): string[] {
+  const recommended = RECOMMENDED_SKILLS.filter(
+    (s) => s.allowedAgents.includes('*') || s.allowedAgents.includes(agentName),
+  ).map((s) => s.skillName);
+
+  const bundled = CUSTOM_SKILLS.filter(
+    (s) => s.allowedAgents.includes('*') || s.allowedAgents.includes(agentName),
+  ).map((s) => s.name);
+
+  return Array.from(new Set([...recommended, ...bundled]));
+}
 
 const AGENT_NAMES = [
   'orchestrator',
@@ -96,13 +109,7 @@ export function generateAntigravityMixedPreset(
     const isOrchestrator = agentName === 'orchestrator';
 
     // Skills: orchestrator gets "*", others get recommended skills for their role
-    const skills = isOrchestrator
-      ? ['*']
-      : RECOMMENDED_SKILLS.filter(
-          (s) =>
-            s.allowedAgents.includes('*') ||
-            s.allowedAgents.includes(agentName),
-        ).map((s) => s.skillName);
+    const skills = isOrchestrator ? ['*'] : getDefaultSkillsForAgent(agentName);
 
     // Special case for designer and agent-browser skill
     if (agentName === 'designer' && !skills.includes('agent-browser')) {
@@ -219,11 +226,7 @@ export function generateLiteConfig(
           skills:
             agentName === 'orchestrator'
               ? ['*']
-              : RECOMMENDED_SKILLS.filter(
-                  (s) =>
-                    s.allowedAgents.includes('*') ||
-                    s.allowedAgents.includes(agentName),
-                ).map((s) => s.skillName),
+              : getDefaultSkillsForAgent(agentName),
           mcps:
             DEFAULT_AGENT_MCPS[agentName as keyof typeof DEFAULT_AGENT_MCPS] ??
             [],
@@ -308,13 +311,7 @@ export function generateLiteConfig(
     const isOrchestrator = agentName === 'orchestrator';
 
     // Skills: orchestrator gets "*", others get recommended skills for their role
-    const skills = isOrchestrator
-      ? ['*']
-      : RECOMMENDED_SKILLS.filter(
-          (s) =>
-            s.allowedAgents.includes('*') ||
-            s.allowedAgents.includes(agentName),
-        ).map((s) => s.skillName);
+    const skills = isOrchestrator ? ['*'] : getDefaultSkillsForAgent(agentName);
 
     // Special case for designer and agent-browser skill
     if (agentName === 'designer' && !skills.includes('agent-browser')) {

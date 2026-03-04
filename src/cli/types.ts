@@ -2,20 +2,9 @@ export type BooleanArg = 'yes' | 'no';
 
 export interface InstallArgs {
   tui: boolean;
-  kimi?: BooleanArg;
-  openai?: BooleanArg;
-  anthropic?: BooleanArg;
-  copilot?: BooleanArg;
-  zaiPlan?: BooleanArg;
-  antigravity?: BooleanArg;
-  chutes?: BooleanArg;
+  model?: string;
   tmux?: BooleanArg;
   skills?: BooleanArg;
-  opencodeFree?: BooleanArg;
-  balancedSpend?: BooleanArg;
-  opencodeFreeModel?: string;
-  aaKey?: string;
-  openrouterKey?: string;
   dryRun?: boolean;
   modelsOnly?: boolean;
 }

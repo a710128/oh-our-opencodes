@@ -6,10 +6,23 @@ import {
   generateLiteConfig,
   MODEL_MAPPINGS,
 } from './providers';
+import type { InstallConfig } from './types';
+
+const baseInstallConfig: InstallConfig = {
+  hasKimi: false,
+  hasOpenAI: false,
+  hasAntigravity: false,
+  hasOpencodeZen: false,
+  hasTmux: false,
+  installSkills: false,
+  installCustomSkills: false,
+  setupMode: 'quick',
+};
 
 describe('providers', () => {
   test('generateLiteConfig generates kimi config when only kimi selected', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: true,
       hasOpenAI: false,
@@ -33,6 +46,7 @@ describe('providers', () => {
 
   test('generateLiteConfig generates kimi-openai preset when both selected', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: true,
       hasOpenAI: true,
@@ -54,6 +68,7 @@ describe('providers', () => {
 
   test('generateLiteConfig generates openai preset when only openai selected', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: true,
@@ -77,6 +92,7 @@ describe('providers', () => {
 
   test('generateLiteConfig generates chutes preset when only chutes selected', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: false,
@@ -101,6 +117,7 @@ describe('providers', () => {
 
   test('generateLiteConfig generates anthropic preset when only anthropic selected', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: false,
@@ -122,6 +139,7 @@ describe('providers', () => {
 
   test('generateLiteConfig prefers Chutes Kimi in mixed openai/antigravity when chutes is enabled', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: true,
       hasKimi: false,
       hasOpenAI: true,
@@ -145,6 +163,7 @@ describe('providers', () => {
 
   test('generateLiteConfig emits fallback chains for five agents', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: true,
       hasKimi: true,
       hasOpenAI: true,
@@ -179,6 +198,7 @@ describe('providers', () => {
 
   test('generateLiteConfig generates zen-free preset when no providers selected', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: false,
@@ -200,6 +220,7 @@ describe('providers', () => {
 
   test('generateLiteConfig uses zen-free big-pickle models', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: false,
@@ -218,6 +239,7 @@ describe('providers', () => {
 
   test('generateLiteConfig enables tmux when requested', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: false,
@@ -233,6 +255,7 @@ describe('providers', () => {
 
   test('generateLiteConfig includes default skills', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: true,
       hasOpenAI: false,
@@ -249,12 +272,13 @@ describe('providers', () => {
     // Designer should have 'agent-browser'
     expect(agents.designer.skills).toContain('agent-browser');
 
-    // Fixer should have no skills by default (empty recommended list)
-    expect(agents.fixer.skills).toEqual([]);
+    // Fixer should include bundled custom skills assigned to fixer
+    expect(agents.fixer.skills).toContain('agents-markdown');
   });
 
   test('generateLiteConfig includes mcps field', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: true,
       hasOpenAI: false,
@@ -273,6 +297,7 @@ describe('providers', () => {
 
   test('generateLiteConfig applies OpenCode free model overrides in hybrid mode', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: true,
@@ -296,6 +321,7 @@ describe('providers', () => {
 
   test('generateLiteConfig applies OpenCode free model overrides in OpenCode-only mode', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: false,
@@ -318,6 +344,7 @@ describe('providers', () => {
 
   test('generateLiteConfig zen-free includes correct mcps', () => {
     const config = generateLiteConfig({
+      ...baseInstallConfig,
       hasAntigravity: false,
       hasKimi: false,
       hasOpenAI: false,
@@ -339,6 +366,7 @@ describe('providers', () => {
   describe('Antigravity presets', () => {
     test('generateLiteConfig generates antigravity-mixed-both preset when all providers selected', () => {
       const config = generateLiteConfig({
+        ...baseInstallConfig,
         hasKimi: true,
         hasOpenAI: true,
         hasAntigravity: true,
@@ -368,6 +396,7 @@ describe('providers', () => {
 
     test('generateLiteConfig generates antigravity-mixed-kimi preset when Kimi + Antigravity', () => {
       const config = generateLiteConfig({
+        ...baseInstallConfig,
         hasKimi: true,
         hasOpenAI: false,
         hasAntigravity: true,
@@ -393,6 +422,7 @@ describe('providers', () => {
 
     test('generateLiteConfig generates antigravity-mixed-openai preset when OpenAI + Antigravity', () => {
       const config = generateLiteConfig({
+        ...baseInstallConfig,
         hasKimi: false,
         hasOpenAI: true,
         hasAntigravity: true,
@@ -420,6 +450,7 @@ describe('providers', () => {
 
     test('generateLiteConfig generates pure antigravity preset when only Antigravity', () => {
       const config = generateLiteConfig({
+        ...baseInstallConfig,
         hasKimi: false,
         hasOpenAI: false,
         hasAntigravity: true,
@@ -445,6 +476,7 @@ describe('providers', () => {
 
     test('generateAntigravityMixedPreset respects Kimi for orchestrator', () => {
       const preset = generateAntigravityMixedPreset({
+        ...baseInstallConfig,
         hasKimi: true,
         hasOpenAI: false,
         hasAntigravity: true,
@@ -459,6 +491,7 @@ describe('providers', () => {
 
     test('generateAntigravityMixedPreset uses OpenAI fixer and Antigravity support defaults', () => {
       const preset = generateAntigravityMixedPreset({
+        ...baseInstallConfig,
         hasKimi: true,
         hasOpenAI: true,
         hasAntigravity: true,

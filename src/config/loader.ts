@@ -53,7 +53,7 @@ function buildDefaultUserConfig(): PluginConfig {
         fixer: {
           model: DEFAULT_MODELS.fixer,
           temperature: DEFAULT_AGENT_TEMPERATURES.fixer,
-          skills: [],
+          skills: ['agents-markdown'],
           mcps: DEFAULT_AGENT_MCPS.fixer,
         },
       },

@@ -28,7 +28,12 @@ export interface CustomSkill {
  * Registry of custom skills bundled in this repository.
  */
 export const CUSTOM_SKILLS: CustomSkill[] = [
-  // Intentionally empty; keep the mechanism for future bundled skills.
+  {
+    name: 'agents-markdown',
+    description: 'Generate consistent agent instructions in Markdown',
+    allowedAgents: ['orchestrator', 'fixer'],
+    sourcePath: 'src/skills/agents-markdown',
+  },
 ];
 
 /**

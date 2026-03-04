@@ -147,7 +147,9 @@ Skills are specialized capabilities provided by external agents and tools. Unlik
 
 ### Custom Skills (bundled in repo)
 
-Currently none.
+| Skill | Description | Assigned To |
+|-------|-------------|-------------|
+| `agents-markdown` | AGENTS.md template + writing instructions | `orchestrator`, `fixer` |
 
 ### Simplify
 
