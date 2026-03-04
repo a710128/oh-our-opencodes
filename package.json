@@ -1,6 +1,6 @@
 {
   "name": "oh-our-opencodes",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Lightweight agent orchestration plugin for OpenCode - our fork for continued development",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
