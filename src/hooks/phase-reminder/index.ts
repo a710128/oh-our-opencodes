@@ -9,7 +9,7 @@
  * Uses experimental.chat.messages.transform so it doesn't show in UI.
  */
 const PHASE_REMINDER = `<reminder>Recall Workflow Rules:
-Understand → find the best path (delegate based on rules and parallelize independent work) → execute → verify.
+Understand → find the best path (delegate based on rules and parallelize independent work) → execute → verify → Update MemX.
 If delegating, launch the specialist in the same turn you mention it.</reminder>`;
 
 interface MessageInfo {

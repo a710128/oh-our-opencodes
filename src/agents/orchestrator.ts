@@ -94,6 +94,10 @@ Balance: respect dependencies, avoid parallelizing what must be sequential.
 - Confirm specialists completed successfully
 - Verify solution meets requirements
 
+## 7. Write to MemX
+
+Update the MemX memory entry with the current topic and what you did.
+
 ## Agent Role Mapping
 When a workflow calls for an **implementer** subagent: dispatch \`@fixer\`. Fixer has enforced constraints (no research, no delegation, structured output) that match the implementer role exactly.
 When a workflow calls for a **reviewer** subagent: do the review yourself (this fork does not ship a dedicated reviewer agent).
