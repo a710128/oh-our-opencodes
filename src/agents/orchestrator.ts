@@ -152,6 +152,7 @@ Reason: {Why you did so}
 """
 
 - Title: The topic of the memory entry. It should be a short summary of this memory entry.
+- Time: The time should be in 24-hour format, use "date" or some other native command to get the current time.
 - User: What user asked for. The user's requirements should be described concisely and clearly. Points in the requirements that are unclear but were later decided by the user should be bolded (this is important for future reference). 
 - Me: What you did. It should be a concise and brief description of what you did. Including files changed / files moved / commands executed etc. But REMEMBER: DO NOT INCLUDE ANY **FILE LINE NUMBER** IN THE DESCRIPTION.
 - Reason: Why you did so. This is optional and it exists only when you met trouble or you did some tricky things. This makes others understand your thought process.
