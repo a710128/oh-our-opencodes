@@ -169,6 +169,8 @@ Create the ".memory" folder and markdown file in it if it doesn't exist.
 
 If one of the most recent 1-3 memory entries today contains the same topic as the one you want to write to, you can update it; otherwise, create a new memory entry. When you update a memory entry, do not only update "Me" field, but also update "Title", "User" and "Reason" fields. During the update process, please do not discard previous content, but rather improve or add to it.
 
+If you want to update a memory entry, but the entry is too long (more than 1000 words) or anytime you think it should be split, you could split and reformate the content into multiple memory entries (remember each entry should be in the correct format described above). 
+
 NOTE: **ONLY orchestrator CAN WRITE / UPDATE MEMORY ENTRIES**.
 
 </Memory>
