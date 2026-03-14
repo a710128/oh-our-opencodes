@@ -11,6 +11,10 @@ Review all current changes in Git, focusing on the following analyses:
 2. Did any changes add functionality that users didn't request?
 3. Did the changes pass tests by modifying test cases even though they broke existing functionality?
 
+**Before you reply**:
+
+Carefully read the surrounding codes of each risk point you find to ensure that the risk point is indeed problematic and not a false alarm.
+
 **Constraints**:
 - READ-ONLY: do not modify files
 - NO git write operations

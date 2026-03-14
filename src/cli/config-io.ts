@@ -11,7 +11,6 @@ import {
   getConfigDir,
   getExistingConfigPath,
   getExistingLiteConfigPath,
-  getLiteConfig,
 } from './paths';
 import { generateLiteConfig } from './providers';
 import type {

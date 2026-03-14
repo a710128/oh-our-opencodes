@@ -1,16 +1,21 @@
 # oh-our-opencodes
 
-Lightweight agent orchestration plugin for OpenCode (this repo is a fork for continued development).
+Lightweight agent orchestration plugin for OpenCode. This fork extends the upstream project with extra orchestration behavior, runtime hooks, background task management, MCP integrations, and agent definitions used by coding agents.
 
 - `src/`: TypeScript source
-  - `src/agents/`: agent prompts/roles (orchestrator/explorer/librarian/designer/fixer)
-  - `src/cli/`: installer + CLI logic
-  - `src/config/`: config schema + loading
-  - `src/hooks/`: runtime behavior hooks
-  - `src/tools/`: tool wrappers
-  - `src/mcp/`: MCP integrations
-- `docs/`: documentation
-- `dist/`: build output (generated)
+  - `src/agents/`: agent prompts, roles, and orchestration definitions
+  - `src/background/`: background task/session management
+  - `src/cli/`: installer, config I/O, provider setup, and CLI entrypoints
+  - `src/commands/`: command implementations exposed to the plugin/runtime
+  - `src/config/`: config schema, parsing, normalization, and loaders
+  - `src/hooks/`: runtime hooks such as retries, recovery, and update checks
+  - `src/mcp/`: MCP server integrations and remote MCP definitions
+  - `src/skills/`: packaged skills shipped with the project
+  - `src/tools/`: tool wrappers for grep, LSP, ast-grep, background tasks, etc.
+  - `src/utils/`: shared utilities and helpers
+- `docs/`: user-facing documentation
+- `dist/`: generated build output and declaration files
+- `.github/`: CI and repository metadata
 
 ## MOST IMPORTANT RULES
 
@@ -22,93 +27,107 @@ Lightweight agent orchestration plugin for OpenCode (this repo is a fork for con
 
 ## Run / Build / Lint / Test
 
-This repo is Bun-first (CI uses Bun).
+This repo is Bun-first. Prefer Bun for install, scripts, and tests unless the user explicitly asks for another tool.
 
-Quick start (typical local loop):
+Core local loop:
 
-- `bun install`
-- `bun run check`
-- `bun test`
-- `bun run build`
+- Install dependencies: `bun install`
+- Run autofix + lint + format-safe checks: `bun run check`
+- Run tests: `bun test`
+- Build distributable output: `bun run build`
 
-- Install deps: `bun install`
-  - CI equivalent: `bun install --frozen-lockfile`
+Primary scripts from `package.json`:
+
 - Build: `bun run build`
-- Typecheck: `bun run typecheck`
-- Lint: `bun run lint`
-- Format: `bun run format`
-- Autofix (format + safe fixes): `bun run check`
-- CI check (no writes): `bun run check:ci`
+- Typecheck only: `bun run typecheck`
+- Lint only: `bun run lint`
+- Format all files: `bun run format`
+- Check with writes: `bun run check`
+- CI check without writes: `bun run check:ci`
+- Dev helper: `bun run dev` (requires `opencode` on `PATH`)
 
-Tests use Bun's test runner:
+Testing guidance:
 
-- Run all tests: `bun test` (or `bun run test`)
+- Run all tests: `bun test` or `bun run test`
 - Run a single test file: `bun test src/cli/providers.test.ts`
-- Run tests matching a name/pattern: `bun test -t "pattern"`
+- Run tests by name pattern: `bun test -t "pattern"`
+- Prefer the narrowest relevant scope before the full suite
+- Tests are co-located in `src/**` as `*.test.ts`
 
-Tips:
+Build and test notes:
 
-- Prefer running the narrowest test scope first (single file or `-t`) before running the full suite.
-- If a change affects config loading or CLI behavior, add/adjust tests under `src/**` (tests are co-located as `*.test.ts`).
+- CI-style dependency install: `bun install --frozen-lockfile`
+- `tsc` excludes `**/*.test.ts`, so test-only TypeScript issues are caught by `bun test`, not `bun run typecheck`
+- `bun run build` compiles runtime files to `dist/` and emits declarations via `tsc --emitDeclarationOnly`
+- Do not edit `dist/` by hand; change `src/` and rebuild
+- Avoid `release:*` scripts unless explicitly performing a release; they version, push tags, and publish
 
-Local dev helper:
+Practical agent workflow:
 
-- `bun run dev` (builds then runs `opencode`)
-  - Requires `opencode` installed and available on PATH.
-
-Notes:
-
-- `tsc` excludes `**/*.test.ts` via `tsconfig.json`, so rely on `bun test` to catch test-only TS issues.
-- `dist/` is generated output; edit `src/` and rebuild instead of editing `dist/` by hand.
-- Avoid running `release:*` scripts unless explicitly doing a release (they run `npm version`, `git push --follow-tags`, and `npm publish`).
+- For code changes, usually run the most relevant single test file first, then `bun test` if the change has wider impact
+- If a change touches config loading, CLI install flow, hooks, or tool wrappers, add or update nearby co-located tests
+- If you change public behavior or generated output assumptions, finish with `bun run build`
 
 Cursor/Copilot rules:
 
-- No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` found in this repo.
+- No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` files are present in this repo at the time this file was written
 
 ## Code Style
 
-### Formatting / Linting (Biome)
+### General formatting
 
-- Use Biome for formatting and linting; do not hand-format.
-- 2-space indentation, LF line endings, 80-column line width.
-- Prefer single quotes; trailing commas are enabled.
-- Keep imports organized (Biome organize-imports is on).
-- `any` is discouraged (Biome `noExplicitAny` warns), but allowed in `**/*.test.ts`.
+- Use Biome for formatting and linting; do not hand-format code that Biome already controls
+- Formatting defaults come from `biome.json`: 2-space indentation, LF endings, 80-column line width, single quotes, trailing commas set to `all`
+- Keep imports organized; Biome organize-imports is enabled
+- Prefer small, focused edits that preserve surrounding structure and behavior
 
-### TypeScript / Modules / Imports
+### TypeScript / modules / imports
 
-- ESM project (`package.json` has `"type": "module"`): prefer `import`/`export`.
-- TypeScript is `strict: true`; avoid weakening types.
-- Prefer `unknown` + narrowing over `any`.
-- Use Node built-ins via `node:` specifiers (e.g. `import * as fs from 'node:fs'`).
-- Prefer `import type { ... }` for type-only imports (keeps runtime bundles clean).
-- Avoid default exports in new code unless there is a strong reason; this repo mostly uses named exports.
+- The project is ESM (`package.json` uses `"type": "module"`); prefer `import` and `export`
+- TypeScript runs in `strict` mode; do not weaken types to make errors disappear
+- Prefer named exports in new code; avoid default exports unless there is a strong existing pattern to match
+- Use `import type { ... }` for type-only imports whenever possible
+- Use Node built-ins via `node:` specifiers such as `node:fs`, `node:path`, and `node:os`
+- Prefer explicit local relative imports that match the existing folder layout
 
-### Naming / Structure
+### Types and validation
 
-- Variables/functions: `camelCase`; types/interfaces/classes: `PascalCase`.
-- Constants: `UPPER_SNAKE_CASE` for true constants.
-- Config keys written to JSON/JSONC may use `snake_case` (matches existing config shape).
-- Files and directories generally use `kebab-case` (e.g. `dynamic-model-selection.ts`, `delegate-task-retry/`).
-- Prefer small, focused modules; colocate tests next to implementation when practical.
+- Prefer `unknown` plus narrowing over `any`; `any` is discouraged and only relaxed in test files by Biome override
+- Validate external or user-provided data with Zod schemas, especially config, JSON, CLI input, and MCP payloads
+- Use `Record<string, unknown>` for unknown object maps, then narrow carefully
+- Use `as const` for literal maps or option tables when you need precise key/value inference
+- Keep public helper signatures narrow and avoid leaking implementation-only union branches when a smaller surface works
 
-### Types / Data validation
+### Naming and file structure
 
-- Prefer Zod schemas for validating external/untrusted input (configs, CLI I/O, JSON files).
-- For “unknown object” shapes, prefer `Record<string, unknown>` and narrow carefully.
-- Use `as const` for literal mapping objects when you want strongly-typed keys/values.
+- Use `camelCase` for variables and functions
+- Use `PascalCase` for types, interfaces, and classes
+- Use `UPPER_SNAKE_CASE` for true constants
+- Prefer `kebab-case` filenames and directories
+- Keep modules single-purpose and colocate tests next to the implementation where practical
+- Config keys written to JSON/JSONC may intentionally use `snake_case` to match the config schema
 
-### Error handling / Logging
+### Error handling and logging
 
-- Prefer explicit error messages and actionable `console.warn` for best-effort/non-fatal failures.
-- In `catch`, normalize unknown errors (`error instanceof Error ? error.message : String(error)`).
-- Avoid throwing in startup/utility paths unless failing fast is required; prefer best-effort behavior when safe.
+- Prefer explicit, actionable error messages
+- In `catch` blocks, normalize unknown failures with `error instanceof Error ? error.message : String(error)`
+- Use `console.warn` for best-effort or recoverable startup/config issues when the program can continue safely
+- Avoid throwing in utility or startup paths unless fail-fast behavior is clearly required
+- Preserve existing recovery-oriented behavior in hooks and loaders unless the change specifically tightens validation
 
-### Comments / Docs
+### Testing and implementation habits
 
-- Prefer short, intention-revealing comments (why something is done), not restating the code.
-- If behavior changes in a user-visible way, update relevant docs under `docs/`.
+- Add or update co-located `*.test.ts` files when behavior changes
+- Keep test fixtures focused and local to the module under test
+- Prefer the smallest behavior-preserving refactor that solves the task
+- Follow existing patterns in nearby files before introducing a new abstraction
+- Update `docs/` when a user-visible workflow or configuration behavior changes
+
+### Comments and generated files
+
+- Write comments only when they explain why a non-obvious choice exists
+- Do not restate code in comments
+- Do not manually edit generated output under `dist/`
 
 ## Git Commit Message Style
 

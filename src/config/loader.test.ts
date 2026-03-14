@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -7,6 +7,24 @@ import { loadAgentPrompt, loadPluginConfig } from './loader';
 
 // Test deepMerge indirectly through loadPluginConfig behavior
 // since deepMerge is not exported
+
+function captureConsoleWarn<T>(fn: () => T): { result: T; warnings: string[] } {
+  const warnings: string[] = [];
+  const originalWarn = console.warn;
+
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.map((arg) => String(arg)).join(' '));
+  };
+
+  try {
+    return {
+      result: fn(),
+      warnings,
+    };
+  } finally {
+    console.warn = originalWarn;
+  }
+}
 
 describe('loadPluginConfig', () => {
   let tempDir: string;
@@ -542,11 +560,13 @@ describe('preset resolution', () => {
       }),
     );
 
-    const consoleWarnSpy = spyOn(console, 'warn');
-    const config = loadPluginConfig(projectDir);
+    const { result: config, warnings } = captureConsoleWarn(() =>
+      loadPluginConfig(projectDir),
+    );
     expect(config.agents?.librarian?.model).toBe('root');
-    expect(consoleWarnSpy).toHaveBeenCalled();
-    const warningMessage = consoleWarnSpy.mock.calls[0][0] as string;
+    expect(warnings.length).toBeGreaterThan(0);
+    const warningMessage =
+      warnings.find((warning) => warning.includes('nonexistent')) || '';
     expect(warningMessage).toContain('Preset "nonexistent" not found');
     expect(warningMessage).toContain('Available presets: other');
   });
@@ -565,11 +585,13 @@ describe('preset resolution', () => {
       }),
     );
 
-    const consoleWarnSpy = spyOn(console, 'warn');
-    const config = loadPluginConfig(projectDir);
+    const { result: config, warnings } = captureConsoleWarn(() =>
+      loadPluginConfig(projectDir),
+    );
     expect(config.agents).toBeUndefined();
-    expect(consoleWarnSpy).toHaveBeenCalled();
-    const warningMessage = consoleWarnSpy.mock.calls[0][0] as string;
+    expect(warnings.length).toBeGreaterThan(0);
+    const warningMessage =
+      warnings.find((warning) => warning.includes('nonexistent')) || '';
     expect(warningMessage).toContain('Preset "nonexistent" not found');
   });
 });
@@ -685,14 +707,14 @@ describe('environment variable preset override', () => {
     );
 
     process.env.OH_OUR_OPENCODES_PRESET = 'typo-preset';
-    const consoleWarnSpy = spyOn(console, 'warn');
-    const config = loadPluginConfig(projectDir);
+    const { result: config, warnings } = captureConsoleWarn(() =>
+      loadPluginConfig(projectDir),
+    );
     expect(config.preset).toBe('typo-preset');
     expect(config.agents?.librarian?.model).toBe('fallback');
-    expect(consoleWarnSpy).toHaveBeenCalled();
-    const calls = consoleWarnSpy.mock.calls as string[][];
+    expect(warnings.length).toBeGreaterThan(0);
     const warningMessage =
-      calls.find((call) => call[0]?.includes('typo-preset'))?.[0] || '';
+      warnings.find((warning) => warning.includes('typo-preset')) || '';
     expect(warningMessage).toContain('Preset "typo-preset" not found');
     expect(warningMessage).toContain('environment variable');
     expect(warningMessage).toContain('config-preset');
@@ -952,33 +974,17 @@ describe('loadAgentPrompt', () => {
     const promptsDir = path.join(tempDir, 'opencode', 'oh-our-opencodes');
     fs.mkdirSync(promptsDir, { recursive: true });
     const promptPath = path.join(promptsDir, 'error-agent.md');
-    fs.writeFileSync(promptPath, 'content');
+    fs.mkdirSync(promptPath, { recursive: true });
 
-    const consoleWarnSpy = spyOn(console, 'warn');
+    const { result, warnings } = captureConsoleWarn(() =>
+      loadAgentPrompt('error-agent'),
+    );
+    expect(result.prompt).toBeUndefined();
 
-    // Use a unique agent name and check for it specifically
-    const originalReadFileSync = fs.readFileSync;
-    const readSpy = spyOn(fs, 'readFileSync').mockImplementation(((
-      p: any,
-      o: any,
-    ) => {
-      if (typeof p === 'string' && p.includes('error-agent.md')) {
-        throw new Error('Read error');
-      }
-      return originalReadFileSync(p, o);
-    }) as typeof fs.readFileSync);
-
-    try {
-      const result = loadAgentPrompt('error-agent');
-      expect(result.prompt).toBeUndefined();
-
-      const warningFound = consoleWarnSpy.mock.calls.some((call) =>
-        (call[0] as string).includes('Error reading prompt file'),
-      );
-      expect(warningFound).toBe(true);
-    } finally {
-      readSpy.mockRestore();
-    }
+    const warningFound = warnings.some((warning) =>
+      warning.includes('Error reading prompt file'),
+    );
+    expect(warningFound).toBe(true);
   });
 
   test('works with XDG_CONFIG_HOME environment variable', () => {
