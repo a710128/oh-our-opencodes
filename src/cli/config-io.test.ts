@@ -11,7 +11,6 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  addChutesProvider,
   addPluginToOpenCodeConfig,
   detectCurrentConfig,
   disableDefaultAgents,
@@ -125,20 +124,147 @@ describe('config-io', () => {
     paths.ensureConfigDir();
 
     const result = writeLiteConfig({
-      hasKimi: true,
-      hasOpenAI: false,
-      hasAntigravity: false,
-      hasOpencodeZen: false,
       hasTmux: true,
       installSkills: false,
       installCustomSkills: false,
+      manualAgentConfigs: {
+        orchestrator: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        designer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        explorer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        librarian: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        fixer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        reviewer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+      },
     });
     expect(result.success).toBe(true);
 
     const saved = JSON.parse(readFileSync(litePath, 'utf-8'));
-    expect(saved.preset).toBe('kimi');
-    expect(saved.presets.kimi).toBeDefined();
+    expect(saved.preset).toBe('manual');
+    expect(saved.presets.manual).toBeDefined();
     expect(saved.tmux.enabled).toBe(true);
+  });
+
+  test('writeLiteConfig prefers existing jsonc lite config path', () => {
+    const jsonPath = join(tmpDir, 'opencode', 'oh-our-opencodes.json');
+    const jsoncPath = join(tmpDir, 'opencode', 'oh-our-opencodes.jsonc');
+    const warn = mock(() => {});
+
+    paths.ensureConfigDir();
+    writeFileSync(jsonPath, JSON.stringify({ preset: 'stale' }));
+    writeFileSync(
+      jsoncPath,
+      '{\n  // keep me visible\n  "preset": "manual"\n}\n',
+    );
+    console.warn = warn as typeof console.warn;
+
+    const result = writeLiteConfig({
+      hasTmux: false,
+      installSkills: false,
+      installCustomSkills: false,
+      manualAgentConfigs: {
+        orchestrator: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        designer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        explorer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        librarian: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        fixer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+        reviewer: {
+          primary: 'openai/gpt-5.3-codex',
+          fallback1: 'opencode/big-pickle',
+          fallback2: 'opencode/big-pickle',
+          fallback3: 'opencode/big-pickle',
+        },
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.configPath).toBe(jsoncPath);
+    expect(JSON.parse(readFileSync(jsoncPath, 'utf-8')).preset).toBe('manual');
+    expect(JSON.parse(readFileSync(jsonPath, 'utf-8')).preset).toBe('stale');
+    expect(warn).toHaveBeenCalledWith(
+      '[config-manager] Writing to .jsonc lite config - comments will not be preserved',
+    );
+  });
+
+  test('detectCurrentConfig prefers jsonc lite config when both files exist', () => {
+    const configPath = join(tmpDir, 'opencode', 'opencode.json');
+    const jsonPath = join(tmpDir, 'opencode', 'oh-our-opencodes.json');
+    const jsoncPath = join(tmpDir, 'opencode', 'oh-our-opencodes.jsonc');
+    paths.ensureConfigDir();
+
+    writeFileSync(configPath, JSON.stringify({ plugin: ['oh-our-opencodes'] }));
+    writeFileSync(
+      jsonPath,
+      JSON.stringify({
+        preset: 'manual',
+        tmux: { enabled: false },
+      }),
+    );
+    writeFileSync(
+      jsoncPath,
+      JSON.stringify({
+        preset: 'manual',
+        tmux: { enabled: true },
+      }),
+    );
+
+    const detected = detectCurrentConfig();
+    expect(detected.isInstalled).toBe(true);
+    expect(detected.hasTmux).toBe(true);
   });
 
   test('disableDefaultAgents disables explore and general agents', () => {
@@ -154,28 +280,18 @@ describe('config-io', () => {
     expect(saved.agent.general.disable).toBe(true);
   });
 
-  test('detectCurrentConfig detects installed status', () => {
+  test('detectCurrentConfig detects installed status and tmux', () => {
     const configPath = join(tmpDir, 'opencode', 'opencode.json');
     const litePath = join(tmpDir, 'opencode', 'oh-our-opencodes.json');
     paths.ensureConfigDir();
 
-    writeFileSync(
-      configPath,
-      JSON.stringify({
-        plugin: ['oh-our-opencodes'],
-        provider: {
-          kimi: {
-            npm: '@ai-sdk/openai-compatible',
-          },
-        },
-      }),
-    );
+    writeFileSync(configPath, JSON.stringify({ plugin: ['oh-our-opencodes'] }));
     writeFileSync(
       litePath,
       JSON.stringify({
-        preset: 'openai',
+        preset: 'manual',
         presets: {
-          openai: {
+          manual: {
             orchestrator: { model: 'openai/gpt-4' },
             designer: { model: 'anthropic/claude-opus-4-6' },
             explorer: { model: 'github-copilot/grok-code-fast-1' },
@@ -188,40 +304,6 @@ describe('config-io', () => {
 
     const detected = detectCurrentConfig();
     expect(detected.isInstalled).toBe(true);
-    expect(detected.hasKimi).toBe(true);
-    expect(detected.hasOpenAI).toBe(true);
-    expect(detected.hasAnthropic).toBe(true);
-    expect(detected.hasCopilot).toBe(true);
-    expect(detected.hasZaiPlan).toBe(true);
     expect(detected.hasTmux).toBe(true);
-  });
-
-  test('addChutesProvider keeps OpenCode auth-based chutes flow intact', () => {
-    const configPath = join(tmpDir, 'opencode', 'opencode.json');
-    const litePath = join(tmpDir, 'opencode', 'oh-our-opencodes.json');
-    paths.ensureConfigDir();
-
-    writeFileSync(configPath, JSON.stringify({ plugin: ['oh-our-opencodes'] }));
-    writeFileSync(
-      litePath,
-      JSON.stringify({
-        preset: 'chutes',
-        presets: {
-          chutes: {
-            orchestrator: { model: 'chutes/kimi-k2.5' },
-          },
-        },
-      }),
-    );
-
-    const result = addChutesProvider();
-    expect(result.success).toBe(true);
-
-    const saved = JSON.parse(readFileSync(configPath, 'utf-8'));
-    expect(saved.plugin).toContain('oh-our-opencodes');
-    expect(saved.provider).toBeUndefined();
-
-    const detected = detectCurrentConfig();
-    expect(detected.hasChutes).toBe(true);
   });
 });

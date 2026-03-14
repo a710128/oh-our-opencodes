@@ -34,11 +34,11 @@ export function getLiteConfigJsonc(): string {
 }
 
 export function getExistingLiteConfigPath(): string {
-  const jsonPath = getLiteConfig();
-  if (existsSync(jsonPath)) return jsonPath;
-
   const jsoncPath = getLiteConfigJsonc();
   if (existsSync(jsoncPath)) return jsoncPath;
+
+  const jsonPath = getLiteConfig();
+  if (existsSync(jsonPath)) return jsonPath;
 
   return jsonPath;
 }

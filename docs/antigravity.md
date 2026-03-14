@@ -2,15 +2,15 @@
 
 ## Quick Setup
 
-1. Install with Antigravity support:
+1. Install the plugin and choose an Antigravity model:
    ```bash
-   bunx oh-our-opencodes install --antigravity=yes
+   bunx oh-our-opencodes install
    ```
 
-2. Authenticate:
+2. Authenticate the provider used by that model:
    ```bash
    opencode auth login
-   # Select "google" provider
+   # Select the Google-backed provider used for your chosen model id
    ```
 
 3. Start using:
@@ -20,10 +20,11 @@
 
 ## How It Works
 
-The installer automatically:
-- Adds `opencode-antigravity-auth@latest` plugin
-- Configures Google provider with all Antigravity and Gemini CLI models
-- Sets up Antigravity-focused agent mapping presets
+This fork does not ship a built-in Antigravity preset.
+
+Use Antigravity models by:
+- authenticating the provider in OpenCode
+- then assigning `google/antigravity-*` model ids inside your own preset
 
 ## Models Available
 
@@ -58,7 +59,7 @@ The installer automatically:
    - Variants: low (8K budget), max (32K budget)
    - Best for: Most complex reasoning
 
-### Gemini CLI Models (Fallback)
+### Gemini CLI Models
 
 6. **gemini-2.5-flash**
    - Name: Gemini 2.5 Flash (Gemini CLI)
@@ -80,35 +81,15 @@ The installer automatically:
    - Context: 1M tokens, Output: 65K tokens
    - Requires: Gemini CLI authentication
 
-## Agent Configuration
-
-When you install with `--antigravity=yes`, the preset depends on other providers:
-
-### antigravity-mixed-both (Kimi + OpenAI + Antigravity)
-- **Orchestrator**: Kimi k2p5
-- **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
-
-### antigravity-mixed-kimi (Kimi + Antigravity)
-- **Orchestrator**: Kimi k2p5
-- **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
-
-### antigravity-mixed-openai (OpenAI + Antigravity)
-- **Orchestrator**: Gemini 3 Flash (Antigravity)
-- **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
-
-### antigravity (Pure Antigravity)
-- **Orchestrator**: Gemini 3 Flash (Antigravity)
-- **Explorer/Librarian/Designer/Fixer**: Gemini 3 Flash (Antigravity)
-
 ## Manual Configuration
 
-If you prefer to configure manually, edit `~/.config/opencode/oh-our-opencodes.json` (or `.jsonc`) and add a pure Antigravity preset:
+If you want an Antigravity-focused setup, edit `~/.config/opencode/oh-our-opencodes.json` (or `.jsonc`) and add your own preset:
 
 ```json
 {
-  "preset": "antigravity",
+  "preset": "antigravity-work",
   "presets": {
-    "antigravity": {
+    "antigravity-work": {
       "orchestrator": {
         "model": "google/antigravity-gemini-3-flash",
         "skills": ["*"],
@@ -137,6 +118,12 @@ If you prefer to configure manually, edit `~/.config/opencode/oh-our-opencodes.j
         "variant": "low",
         "skills": [],
         "mcps": []
+      },
+      "reviewer": {
+        "model": "google/antigravity-gemini-3-flash",
+        "variant": "low",
+        "skills": [],
+        "mcps": []
       }
     }
   }
@@ -147,21 +134,20 @@ If you prefer to configure manually, edit `~/.config/opencode/oh-our-opencodes.j
 
 ### Authentication Failed
 ```bash
-# Ensure Antigravity service is running
-# Check service status
-curl http://127.0.0.1:8317/health
-
 # Re-authenticate
 opencode auth login
+
+# Then confirm your preset uses the expected model ids
+cat ~/.config/opencode/oh-our-opencodes.json
 ```
 
 ### Models Not Available
 ```bash
-# Verify plugin is installed
-cat ~/.config/opencode/opencode.json | grep antigravity
+# Refresh the model list in OpenCode
+opencode models --refresh --verbose
 
-# Reinstall plugin
-bunx oh-our-opencodes install --antigravity=yes --no-tui --kimi=no --openai=no --tmux=no --skills=no
+# Rewrite the generated manual preset with an Antigravity model
+bunx oh-our-opencodes install --no-tui --model=google/antigravity-gemini-3-flash --tmux=no --skills=no
 ```
 
 ### Wrong Model Selected
@@ -170,24 +156,22 @@ bunx oh-our-opencodes install --antigravity=yes --no-tui --kimi=no --openai=no -
 echo $OH_OUR_OPENCODES_PRESET
 
 # Change preset
-export OH_OUR_OPENCODES_PRESET=antigravity
+export OH_OUR_OPENCODES_PRESET=antigravity-work
 opencode
 ```
 
-### Service Connection Issues
+### Provider Connection Issues
 ```bash
-# Check if Antigravity service is running on correct port
-lsof -i :8317
+# Re-authenticate the provider used by your model ids
+opencode auth login
 
-# Restart the service
-# (Follow your Antigravity/LLM-Mux restart procedure)
 # Or edit ~/.config/opencode/oh-our-opencodes.json (or .jsonc)
-# Change the "preset" field and restart OpenCode
+# Change the model ids or preset, then restart OpenCode
 ```
 
 ## Notes
 
 - **Terms of Service**: Using Antigravity may violate Google's ToS. Use at your own risk.
 - **Performance**: Antigravity models typically have lower latency than direct API calls
-- **Fallback**: Gemini CLI models require separate authentication but work as fallback
+- **Fallback**: Automatic fallback is not configured by the installer; add fallback chains manually if you want Gemini CLI models as backups
 - **Customization**: You can mix and match any models across agents by editing the config

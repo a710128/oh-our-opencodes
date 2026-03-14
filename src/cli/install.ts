@@ -18,7 +18,7 @@ import type {
   DetectedConfig,
   InstallArgs,
   InstallConfig,
-  ManualAgentConfig,
+  ManualAgentConfigs,
 } from './types';
 
 // Colors
@@ -110,22 +110,20 @@ function handleStepResult(
 }
 
 function formatConfigSummary(config: InstallConfig): string {
-  const liteConfig = generateLiteConfig(config);
-  const preset = (liteConfig.preset as string) || 'unknown';
+  const agents = (generateLiteConfig(config).presets as Record<string, unknown>)
+    .manual as Record<string, { model?: string }>;
 
   const lines: string[] = [];
   lines.push(`${BOLD}Configuration Summary${RESET}`);
   lines.push('');
-  lines.push(`  ${BOLD}Preset:${RESET} ${BLUE}${preset}${RESET}`);
+  lines.push(`  ${BOLD}Preset:${RESET} ${BLUE}manual${RESET}`);
 
-  const presets = liteConfig.presets as Record<string, unknown>;
-  const agents = presets?.[preset] as Record<string, { model?: string }>;
   const chosenModel = agents?.orchestrator?.model;
   if (chosenModel) {
     lines.push(`  ${BOLD}Model:${RESET} ${BLUE}${chosenModel}${RESET}`);
   }
 
-  lines.push(`  ${SYMBOLS.check} Opencode Zen`);
+  lines.push(`  ${SYMBOLS.check} Manual preset`);
   lines.push(
     `  ${config.hasTmux ? SYMBOLS.check : `${DIM}○${RESET}`} Tmux Integration`,
   );
@@ -133,18 +131,13 @@ function formatConfigSummary(config: InstallConfig): string {
 }
 
 function printAgentModels(config: InstallConfig): void {
-  const liteConfig = generateLiteConfig(config);
-  const presetName = (liteConfig.preset as string) || 'unknown';
-  const presets = liteConfig.presets as Record<string, unknown>;
-  const agents = presets?.[presetName] as Record<
-    string,
-    { model: string; skills: string[] }
-  >;
+  const agents = (generateLiteConfig(config).presets as Record<string, unknown>)
+    .manual as Record<string, { model: string; skills: string[] }>;
 
   if (!agents || Object.keys(agents).length === 0) return;
 
   console.log(
-    `${BOLD}Agent Configuration (Preset: ${BLUE}${presetName}${RESET}):${RESET}`,
+    `${BOLD}Agent Configuration (Preset: ${BLUE}manual${RESET}):${RESET}`,
   );
   console.log();
 
@@ -163,56 +156,63 @@ function printAgentModels(config: InstallConfig): void {
   console.log();
 }
 
-function argsToConfig(args: InstallArgs): InstallConfig {
+function argsToConfig(
+  args: InstallArgs,
+  detected: DetectedConfig,
+): InstallConfig {
   const model = args.model?.trim() || 'opencode/big-pickle';
 
-  const manualAgentConfigs: Record<string, ManualAgentConfig> =
-    buildSingleModelManualAgentConfigs(model);
+  const manualAgentConfigs = buildSingleModelManualAgentConfigs(model);
 
   return {
-    hasKimi: false,
-    hasOpenAI: false,
-    hasAnthropic: false,
-    hasCopilot: false,
-    hasZaiPlan: false,
-    hasAntigravity: false,
-    hasChutes: false,
-    hasOpencodeZen: true, // Always enabled - free models available to all users
-    useOpenCodeFreeModels: false,
-    balanceProviderUsage: false,
-    hasTmux: args.tmux === 'yes',
+    hasTmux: args.tmux ? args.tmux === 'yes' : detected.hasTmux,
     installSkills: args.skills === 'yes',
     installCustomSkills: args.skills === 'yes', // Install custom skills when skills=yes
-    setupMode: 'manual',
     manualAgentConfigs,
     dryRun: args.dryRun,
     modelsOnly: args.modelsOnly,
   };
 }
 
-function buildSingleModelManualAgentConfigs(
-  model: string,
-): Record<string, ManualAgentConfig> {
-  const fallback = 'opencode/big-pickle';
-  const agentNames = [
-    'orchestrator',
-    'designer',
-    'explorer',
-    'librarian',
-    'fixer',
-  ];
-
-  const result: Record<string, ManualAgentConfig> = {};
-  for (const agentName of agentNames) {
-    result[agentName] = {
+function buildSingleModelManualAgentConfigs(model: string): ManualAgentConfigs {
+  return {
+    orchestrator: {
       primary: model,
-      fallback1: fallback,
-      fallback2: fallback,
-      fallback3: fallback,
-    };
-  }
-
-  return result;
+      fallback1: model,
+      fallback2: model,
+      fallback3: model,
+    },
+    designer: {
+      primary: model,
+      fallback1: model,
+      fallback2: model,
+      fallback3: model,
+    },
+    explorer: {
+      primary: model,
+      fallback1: model,
+      fallback2: model,
+      fallback3: model,
+    },
+    librarian: {
+      primary: model,
+      fallback1: model,
+      fallback2: model,
+      fallback3: model,
+    },
+    fixer: {
+      primary: model,
+      fallback1: model,
+      fallback2: model,
+      fallback3: model,
+    },
+    reviewer: {
+      primary: model,
+      fallback1: model,
+      fallback2: model,
+      fallback3: model,
+    },
+  };
 }
 
 async function askYesNo(
@@ -298,7 +298,9 @@ async function askModelByNumber(
 }
 
 async function runInteractiveMode(
-  _detected: DetectedConfig,
+  detected: DetectedConfig,
+  tmuxArg: BooleanArg | undefined,
+  skillsArg: BooleanArg | undefined,
   modelsOnly = false,
 ): Promise<InstallConfig> {
   const rl = readline.createInterface({
@@ -353,62 +355,42 @@ async function runInteractiveMode(
 
     const manualAgentConfigs = buildSingleModelManualAgentConfigs(chosenModel);
 
-    // TODO: tmux has a bug, disabled for now
-    // let tmux: BooleanArg = "no"
-    // if (tmuxInstalled) {
-    //   console.log(`${BOLD}Question 3/3:${RESET}`)
-    //   printInfo(`${BOLD}Tmux detected!${RESET} We can enable tmux integration for you.`)
-    //   printInfo("This will spawn new panes for sub-agents, letting you watch them work in real-time.")
-    //   tmux = await askYesNo(rl, "Enable tmux integration?", detected.hasTmux ? "yes" : "no")
-    //   console.log()
-    // }
-
     let skills: BooleanArg = 'no';
     let customSkills: BooleanArg = 'no';
     if (!modelsOnly) {
-      // Skills prompt
-      console.log(`${BOLD}Recommended Skills:${RESET}`);
-      for (const skill of RECOMMENDED_SKILLS) {
-        console.log(
-          `  ${SYMBOLS.bullet} ${BOLD}${skill.name}${RESET}: ${skill.description}`,
-        );
-      }
-      console.log();
-      skills = await askYesNo(rl, 'Install recommended skills?', 'yes');
-      console.log();
+      if (skillsArg) {
+        skills = skillsArg;
+        customSkills = skillsArg;
+      } else {
+        console.log(`${BOLD}Recommended Skills:${RESET}`);
+        for (const skill of RECOMMENDED_SKILLS) {
+          console.log(
+            `  ${SYMBOLS.bullet} ${BOLD}${skill.name}${RESET}: ${skill.description}`,
+          );
+        }
+        console.log();
+        skills = await askYesNo(rl, 'Install recommended skills?', 'yes');
+        console.log();
 
-      // Custom skills prompt
-      console.log(`${BOLD}Custom Skills:${RESET}`);
-      for (const skill of CUSTOM_SKILLS) {
-        console.log(
-          `  ${SYMBOLS.bullet} ${BOLD}${skill.name}${RESET}: ${skill.description}`,
-        );
+        console.log(`${BOLD}Custom Skills:${RESET}`);
+        for (const skill of CUSTOM_SKILLS) {
+          console.log(
+            `  ${SYMBOLS.bullet} ${BOLD}${skill.name}${RESET}: ${skill.description}`,
+          );
+        }
+        console.log();
+        customSkills = await askYesNo(rl, 'Install custom skills?', 'yes');
+        console.log();
       }
-      console.log();
-      customSkills = await askYesNo(rl, 'Install custom skills?', 'yes');
-      console.log();
     } else {
-      printInfo(
-        'Models-only mode: skipping plugin/auth setup and skills prompts.',
-      );
+      printInfo('Models-only mode: skipping plugin setup and skills prompts.');
       console.log();
     }
 
     return {
-      hasKimi: false,
-      hasOpenAI: false,
-      hasAnthropic: false,
-      hasCopilot: false,
-      hasZaiPlan: false,
-      hasAntigravity: false,
-      hasChutes: false,
-      hasOpencodeZen: true,
-      useOpenCodeFreeModels: false,
-      balanceProviderUsage: false,
-      hasTmux: false,
+      hasTmux: tmuxArg ? tmuxArg === 'yes' : detected.hasTmux,
       installSkills: skills === 'yes',
       installCustomSkills: customSkills === 'yes',
-      setupMode: 'manual',
       manualAgentConfigs,
       modelsOnly,
     };
@@ -441,6 +423,16 @@ async function runInstall(config: InstallConfig): Promise<number> {
       'Models-only mode: updating model assignments without reinstalling plugins/skills.',
     );
   }
+
+  if (isUpdate) {
+    printWarning(
+      'This run rewrites the generated manual preset. Reapply any custom per-agent model or fallback edits afterward.',
+    );
+  }
+
+  printWarning(
+    'The generated manual preset does not add automatic backup models. If you want failover, edit fallback chains yourself after install.',
+  );
 
   printStep(step++, totalSteps, 'Checking OpenCode installation...');
   if (resolvedConfig.dryRun) {
@@ -546,15 +538,14 @@ async function runInstall(config: InstallConfig): Promise<number> {
 
   let nextStep = 1;
 
-  // TODO: tmux has a bug, disabled for now
-  // if (config.hasTmux) {
-  //   console.log(`  ${nextStep++}. Run OpenCode inside tmux:`)
-  //   console.log(`     ${BLUE}$ tmux${RESET}`)
-  //   console.log(`     ${BLUE}$ opencode${RESET}`)
-  // } else {
+  console.log(
+    `  ${nextStep++}. Authenticate the provider for your chosen model:`,
+  );
+  console.log(`     ${BLUE}$ opencode auth login${RESET}`);
+  console.log();
+
   console.log(`  ${nextStep++}. Start OpenCode:`);
   console.log(`     ${BLUE}$ opencode${RESET}`);
-  // }
   console.log();
 
   return 0;
@@ -564,15 +555,24 @@ export async function install(args: InstallArgs): Promise<number> {
   // Non-interactive mode: all args must be provided
   if (!args.tui) {
     const missingModel = !args.model || args.model.trim().length === 0;
+    const unknownArgs = args.unknownArgs ?? [];
 
     const invalidTmux =
       args.tmux !== undefined && !['yes', 'no'].includes(args.tmux);
     const invalidSkills =
       args.skills !== undefined && !['yes', 'no'].includes(args.skills);
 
-    if (missingModel || invalidTmux || invalidSkills) {
+    if (
+      missingModel ||
+      invalidTmux ||
+      invalidSkills ||
+      unknownArgs.length > 0
+    ) {
       printHeader(false);
       printError('Missing or invalid arguments:');
+      for (const arg of unknownArgs) {
+        console.log(`  ${SYMBOLS.bullet} Unsupported flag: ${arg}`);
+      }
       if (missingModel) {
         console.log(`  ${SYMBOLS.bullet} --model=<id>`);
       }
@@ -592,12 +592,35 @@ export async function install(args: InstallArgs): Promise<number> {
       return 1;
     }
 
-    const nonInteractiveConfig = argsToConfig(args);
+    const detected = detectCurrentConfig();
+    const nonInteractiveConfig = argsToConfig(args, detected);
     return runInstall(nonInteractiveConfig);
   }
 
   // Interactive mode
   const detected = detectCurrentConfig();
+  const invalidTmux =
+    args.tmux !== undefined && !['yes', 'no'].includes(args.tmux);
+  const invalidSkills =
+    args.skills !== undefined && !['yes', 'no'].includes(args.skills);
+
+  if ((args.unknownArgs ?? []).length > 0 || invalidTmux || invalidSkills) {
+    printHeader(detected.isInstalled);
+    printError('Unsupported or invalid arguments:');
+    for (const arg of args.unknownArgs ?? []) {
+      console.log(`  ${SYMBOLS.bullet} ${arg}`);
+    }
+    if (invalidTmux) {
+      console.log(`  ${SYMBOLS.bullet} --tmux=<yes|no>`);
+    }
+    if (invalidSkills) {
+      console.log(`  ${SYMBOLS.bullet} --skills=<yes|no>`);
+    }
+    console.log();
+    printInfo('Run with --help for the supported manual-only install flags.');
+    console.log();
+    return 1;
+  }
 
   printHeader(detected.isInstalled);
 
@@ -610,7 +633,12 @@ export async function install(args: InstallArgs): Promise<number> {
   }
   console.log();
 
-  const config = await runInteractiveMode(detected, args.modelsOnly === true);
+  const config = await runInteractiveMode(
+    detected,
+    args.tmux,
+    args.skills,
+    args.modelsOnly === true,
+  );
   // Pass dryRun through to the config
   config.dryRun = args.dryRun;
   config.modelsOnly = args.modelsOnly;

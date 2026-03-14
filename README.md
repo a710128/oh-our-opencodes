@@ -15,10 +15,10 @@
 bunx oh-our-opencodes@latest install
 ```
 
-The installer can refresh and use OpenCode free models directly:
+For a non-interactive install, pass one concrete model id:
 
 ```bash
-bunx oh-our-opencodes@latest install --no-tui --kimi=yes --openai=yes --antigravity=yes --chutes=yes --opencode-free=yes --opencode-free-model=auto --tmux=no --skills=yes
+bunx oh-our-opencodes@latest install --no-tui --model=opencode/big-pickle --tmux=no --skills=yes
 ```
 
 Then authenticate:
@@ -29,11 +29,11 @@ opencode auth login
 
 Run `ping all agents` to verify everything works.
 
-OpenCode free-model mode uses `opencode models --refresh --verbose`, filters to free `opencode/*` models, and applies coding-first selection:
-- OpenCode-only mode can use multiple OpenCode free models across agents.
-- Hybrid mode can combine OpenCode free models with OpenAI, Kimi, and/or Antigravity.
-- In hybrid mode, `designer` stays on the external provider mapping.
-- Chutes mode auto-selects primary/support models with daily-cap awareness (300/2000/5000).
+The current installer is manual-only:
+- Interactive mode runs `opencode models --refresh --verbose` and lets you choose one model
+- Non-interactive mode requires `--model=<id>`
+- The generated config writes a single `manual` preset with that model applied across all agents
+- If you want mixed providers or fallback chains, edit `~/.config/opencode/oh-our-opencodes.json` or `.jsonc` after install
 
 > **💡 Models are fully customizable.** Edit `~/.config/opencode/oh-our-opencodes.json` (or `.jsonc` for comments support) to assign any model to any agent.
 
@@ -205,6 +205,33 @@ https://raw.githubusercontent.com/a710128/oh-our-opencodes/refs/heads/master/REA
   <tr>
     <td colspan="2">
       <b>Recommended Models:</b> <code>cerebras/zai-glm-4.7</code> <code>google/gemini-3-flash</code> <code>openai/gpt-5.1-codex-mini</code>
+    </td>
+  </tr>
+</table>
+
+---
+
+### 06. Reviewer: The Keeper of Standards
+
+<table>
+  <tr>
+    <td width="70%" valign="top">
+      The Reviewer stands at the threshold between implementation and trust. They examine scoped changes with cold precision, tracing consequences, spotting regressions, and calling out risk before flawed work escapes into the wild. They do not build - they judge whether what was built is safe to keep.
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <b>Role:</b> <code>Scoped code review and risk assessment</code>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <b>Prompt:</b> <a href="src/agents/reviewer.ts"><code>reviewer.ts</code></a>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <b>Recommended Models:</b> <code>openai/gpt-5.1-codex-mini</code> <code>google/gemini-3-flash</code>
     </td>
   </tr>
 </table>

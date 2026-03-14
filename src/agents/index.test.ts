@@ -156,6 +156,13 @@ describe('question permissions', () => {
     expect(fixer?.config.permission).toBeDefined();
     expect((fixer?.config.permission as any).question).toBe('deny');
   });
+
+  test('reviewer has question permission set to deny', () => {
+    const agents = createAgents();
+    const reviewer = agents.find((a) => a.name === 'reviewer');
+    expect(reviewer?.config.permission).toBeDefined();
+    expect((reviewer?.config.permission as any).question).toBe('deny');
+  });
 });
 
 describe('skill permissions', () => {
@@ -178,7 +185,14 @@ describe('skill permissions', () => {
     expect(skillPerm?.['*']).toBe('deny');
   });
 
-  // No dedicated reviewer agent is shipped in this fork.
+  test('reviewer denies skill wildcard by default', () => {
+    const agents = createAgents();
+    const reviewer = agents.find((a) => a.name === 'reviewer');
+    expect(reviewer).toBeDefined();
+    const skillPerm = (reviewer?.config.permission as Record<string, unknown>)
+      ?.skill as Record<string, string>;
+    expect(skillPerm?.['*']).toBe('deny');
+  });
 });
 
 describe('isSubagent type guard', () => {
@@ -187,6 +201,7 @@ describe('isSubagent type guard', () => {
     expect(isSubagent('librarian')).toBe(true);
     expect(isSubagent('designer')).toBe(true);
     expect(isSubagent('fixer')).toBe(true);
+    expect(isSubagent('reviewer')).toBe(true);
   });
 
   test('returns false for orchestrator', () => {
@@ -205,6 +220,7 @@ describe('agent classification', () => {
     expect(SUBAGENT_NAMES).not.toContain('orchestrator');
     expect(SUBAGENT_NAMES).toContain('explorer');
     expect(SUBAGENT_NAMES).toContain('fixer');
+    expect(SUBAGENT_NAMES).toContain('reviewer');
   });
 
   test('getAgentConfigs applies correct classification visibility and mode', () => {
@@ -229,11 +245,12 @@ describe('createAgents', () => {
     expect(names).toContain('designer');
     expect(names).toContain('librarian');
     expect(names).toContain('fixer');
+    expect(names).toContain('reviewer');
   });
 
-  test('creates exactly 5 agents (1 primary + 4 subagents)', () => {
+  test('creates exactly 6 agents (1 primary + 5 subagents)', () => {
     const agents = createAgents();
-    expect(agents.length).toBe(5);
+    expect(agents.length).toBe(6);
   });
 });
 

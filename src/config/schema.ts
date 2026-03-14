@@ -6,6 +6,7 @@ const FALLBACK_AGENT_NAMES = [
   'explorer',
   'librarian',
   'fixer',
+  'reviewer',
 ] as const;
 
 const MANUAL_AGENT_NAMES = [
@@ -14,6 +15,7 @@ const MANUAL_AGENT_NAMES = [
   'explorer',
   'librarian',
   'fixer',
+  'reviewer',
 ] as const;
 
 const ProviderModelIdSchema = z
@@ -52,6 +54,7 @@ export const ManualPlanSchema = z
     explorer: ManualAgentPlanSchema,
     librarian: ManualAgentPlanSchema,
     fixer: ManualAgentPlanSchema,
+    reviewer: ManualAgentPlanSchema,
   })
   .strict();
 
@@ -68,6 +71,7 @@ const FallbackChainsSchema = z
     explorer: AgentModelChainSchema.optional(),
     librarian: AgentModelChainSchema.optional(),
     fixer: AgentModelChainSchema.optional(),
+    reviewer: AgentModelChainSchema.optional(),
   })
   .catchall(AgentModelChainSchema);
 
@@ -130,8 +134,6 @@ export type FailoverConfig = z.infer<typeof FailoverConfigSchema>;
 // Main plugin config
 export const PluginConfigSchema = z.object({
   preset: z.string().optional(),
-  scoringEngineVersion: z.enum(['v1', 'v2-shadow', 'v2']).optional(),
-  balanceProviderUsage: z.boolean().optional(),
   manualPlan: ManualPlanSchema.optional(),
   presets: z.record(z.string(), PresetSchema).optional(),
   agents: z.record(z.string(), AgentOverrideConfigSchema).optional(),

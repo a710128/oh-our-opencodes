@@ -10,6 +10,7 @@ import {
   ensureConfigDir,
   getConfigDir,
   getExistingConfigPath,
+  getExistingLiteConfigPath,
   getLiteConfig,
 } from './paths';
 import { generateLiteConfig } from './providers';
@@ -137,17 +138,20 @@ export async function addPluginToOpenCodeConfig(): Promise<ConfigMergeResult> {
   }
 }
 
-// Removed: addAuthPlugins - no longer needed with cliproxy
-// Removed: addProviderConfig - default opencode now has kimi provider config
-
 export function writeLiteConfig(
   installConfig: InstallConfig,
 ): ConfigMergeResult {
-  const configPath = getLiteConfig();
+  const configPath = getExistingLiteConfigPath();
 
   try {
     ensureConfigDir();
     const config = generateLiteConfig(installConfig);
+
+    if (configPath.endsWith('.jsonc')) {
+      console.warn(
+        '[config-manager] Writing to .jsonc lite config - comments will not be preserved',
+      );
+    }
 
     // Atomic write for lite config too
     const tmpPath = `${configPath}.tmp`;
@@ -215,224 +219,21 @@ export function canModifyOpenCodeConfig(): boolean {
   }
 }
 
-export function addAntigravityPlugin(): ConfigMergeResult {
-  const configPath = getExistingConfigPath();
-  try {
-    const { config: parsedConfig, error } = parseConfig(configPath);
-    if (error) {
-      return {
-        success: false,
-        configPath,
-        error: `Failed to parse config: ${error}`,
-      };
-    }
-    const config = parsedConfig ?? {};
-    const plugins = config.plugin ?? [];
-
-    const pluginName = 'opencode-antigravity-auth@latest';
-    if (!plugins.includes(pluginName)) {
-      plugins.push(pluginName);
-    }
-    config.plugin = plugins;
-
-    writeConfig(configPath, config);
-    return { success: true, configPath };
-  } catch (err) {
-    return {
-      success: false,
-      configPath,
-      error: `Failed to add antigravity plugin: ${err}`,
-    };
-  }
-}
-
-export function addGoogleProvider(): ConfigMergeResult {
-  const configPath = getExistingConfigPath();
-  try {
-    const { config: parsedConfig, error } = parseConfig(configPath);
-    if (error) {
-      return {
-        success: false,
-        configPath,
-        error: `Failed to parse config: ${error}`,
-      };
-    }
-    const config = parsedConfig ?? {};
-    const providers = (config.provider ?? {}) as Record<string, unknown>;
-
-    providers.google = {
-      models: {
-        'antigravity-gemini-3.1-pro': {
-          name: 'Gemini 3.1 Pro (Antigravity)',
-          limit: { context: 1048576, output: 65535 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-          variants: {
-            low: { thinkingLevel: 'low' },
-            high: { thinkingLevel: 'high' },
-          },
-        },
-        'antigravity-gemini-3-flash': {
-          name: 'Gemini 3 Flash (Antigravity)',
-          limit: { context: 1048576, output: 65536 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-          variants: {
-            minimal: { thinkingLevel: 'minimal' },
-            low: { thinkingLevel: 'low' },
-            medium: { thinkingLevel: 'medium' },
-            high: { thinkingLevel: 'high' },
-          },
-        },
-        'antigravity-claude-sonnet-4-5': {
-          name: 'Claude Sonnet 4.5 (Antigravity)',
-          limit: { context: 200000, output: 64000 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-        },
-        'antigravity-claude-sonnet-4-5-thinking': {
-          name: 'Claude Sonnet 4.5 Thinking (Antigravity)',
-          limit: { context: 200000, output: 64000 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-          variants: {
-            low: { thinkingConfig: { thinkingBudget: 8192 } },
-            max: { thinkingConfig: { thinkingBudget: 32768 } },
-          },
-        },
-        'antigravity-claude-opus-4-5-thinking': {
-          name: 'Claude Opus 4.5 Thinking (Antigravity)',
-          limit: { context: 200000, output: 64000 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-          variants: {
-            low: { thinkingConfig: { thinkingBudget: 8192 } },
-            max: { thinkingConfig: { thinkingBudget: 32768 } },
-          },
-        },
-        'gemini-2.5-flash': {
-          name: 'Gemini 2.5 Flash (Gemini CLI)',
-          limit: { context: 1048576, output: 65536 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-        },
-        'gemini-2.5-pro': {
-          name: 'Gemini 2.5 Pro (Gemini CLI)',
-          limit: { context: 1048576, output: 65536 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-        },
-        'gemini-3-flash-preview': {
-          name: 'Gemini 3 Flash Preview (Gemini CLI)',
-          limit: { context: 1048576, output: 65536 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-        },
-        'gemini-3.1-pro-preview': {
-          name: 'Gemini 3.1 Pro Preview (Gemini CLI)',
-          limit: { context: 1048576, output: 65535 },
-          modalities: { input: ['text', 'image', 'pdf'], output: ['text'] },
-        },
-      },
-    };
-    config.provider = providers;
-
-    writeConfig(configPath, config);
-    return { success: true, configPath };
-  } catch (err) {
-    return {
-      success: false,
-      configPath,
-      error: `Failed to add google provider: ${err}`,
-    };
-  }
-}
-
-export function addChutesProvider(): ConfigMergeResult {
-  const configPath = getExistingConfigPath();
-  try {
-    // Chutes now follows the OpenCode auth flow (same as other providers).
-    // Keep this step as a no-op success for backward-compatible install output.
-    const { error } = parseConfig(configPath);
-    if (error) {
-      return {
-        success: false,
-        configPath,
-        error: `Failed to parse config: ${error}`,
-      };
-    }
-    return { success: true, configPath };
-  } catch (err) {
-    return {
-      success: false,
-      configPath,
-      error: `Failed to validate chutes provider config: ${err}`,
-    };
-  }
-}
-
-export function detectAntigravityConfig(): boolean {
-  const { config } = parseConfig(getExistingConfigPath());
-  if (!config) return false;
-
-  const providers = config.provider as Record<string, unknown> | undefined;
-  if (providers?.google) return true;
-
-  const plugins = config.plugin ?? [];
-  return plugins.some((p) => p.startsWith('opencode-antigravity-auth'));
-}
-
 export function detectCurrentConfig(): DetectedConfig {
   const result: DetectedConfig = {
     isInstalled: false,
-    hasKimi: false,
-    hasOpenAI: false,
-    hasAnthropic: false,
-    hasCopilot: false,
-    hasZaiPlan: false,
-    hasAntigravity: false,
-    hasChutes: false,
-    hasOpencodeZen: false,
     hasTmux: false,
   };
 
   const { config } = parseConfig(getExistingConfigPath());
-  if (!config) return result;
+  if (config) {
+    const plugins = config.plugin ?? [];
+    result.isInstalled = plugins.some((p) => p.startsWith(PACKAGE_NAME));
+  }
 
-  const plugins = config.plugin ?? [];
-  result.isInstalled = plugins.some((p) => p.startsWith(PACKAGE_NAME));
-  result.hasAntigravity = plugins.some((p) =>
-    p.startsWith('opencode-antigravity-auth'),
-  );
-
-  // Check for providers
-  const providers = config.provider as Record<string, unknown> | undefined;
-  result.hasKimi = !!providers?.kimi;
-  result.hasAnthropic = !!providers?.anthropic;
-  result.hasCopilot = !!providers?.['github-copilot'];
-  result.hasZaiPlan = !!providers?.['zai-coding-plan'];
-  result.hasChutes = !!providers?.chutes;
-  if (providers?.google) result.hasAntigravity = true;
-
-  // Try to detect from lite config
-  const { config: liteConfig } = parseConfig(getLiteConfig());
+  const { config: liteConfig } = parseConfig(getExistingLiteConfigPath());
   if (liteConfig && typeof liteConfig === 'object') {
     const configObj = liteConfig as Record<string, unknown>;
-    const presetName = configObj.preset as string;
-    const presets = configObj.presets as Record<string, unknown>;
-    const agents = presets?.[presetName] as
-      | Record<string, { model?: string }>
-      | undefined;
-
-    if (agents) {
-      const models = Object.values(agents)
-        .map((a) => a?.model)
-        .filter(Boolean);
-      result.hasOpenAI = models.some((m) => m?.startsWith('openai/'));
-      result.hasAnthropic = models.some((m) => m?.startsWith('anthropic/'));
-      result.hasCopilot = models.some((m) => m?.startsWith('github-copilot/'));
-      result.hasZaiPlan = models.some((m) => m?.startsWith('zai-coding-plan/'));
-      result.hasOpencodeZen = models.some((m) => m?.startsWith('opencode/'));
-      if (models.some((m) => m?.startsWith('google/'))) {
-        result.hasAntigravity = true;
-      }
-      if (models.some((m) => m?.startsWith('chutes/'))) {
-        result.hasChutes = true;
-      }
-    }
-
     if (configObj.tmux && typeof configObj.tmux === 'object') {
       const tmuxConfig = configObj.tmux as { enabled?: boolean };
       result.hasTmux = tmuxConfig.enabled === true;

@@ -9,6 +9,7 @@ export const SUBAGENT_NAMES = [
   'librarian',
   'designer',
   'fixer',
+  'reviewer',
 ] as const;
 
 export const ORCHESTRATOR_NAME = 'orchestrator' as const;
@@ -27,6 +28,7 @@ export type AgentName = (typeof ALL_AGENT_NAMES)[number];
 export const SUBAGENT_DELEGATION_RULES: Record<AgentName, readonly string[]> = {
   orchestrator: SUBAGENT_NAMES,
   fixer: [],
+  reviewer: [],
   designer: [],
   explorer: [],
   librarian: [],
@@ -39,6 +41,7 @@ export const DEFAULT_MODELS: Record<AgentName, string> = {
   explorer: 'openai/gpt-5.1-codex-mini',
   designer: 'kimi-for-coding/k2p5',
   fixer: 'openai/gpt-5.1-codex-mini',
+  reviewer: 'openai/gpt-5.1-codex-mini',
 };
 
 // Default temperatures per agent (single source of truth for runtime defaults
@@ -49,6 +52,7 @@ export const DEFAULT_AGENT_TEMPERATURES: Record<AgentName, number> = {
   explorer: 0.1,
   designer: 0.7,
   fixer: 0.2,
+  reviewer: 0.1,
 };
 
 // Default MCPs per agent - "*" means all MCPs, "!item" excludes specific MCPs.
@@ -58,6 +62,7 @@ export const DEFAULT_AGENT_MCPS: Record<AgentName, string[]> = {
   librarian: ['websearch', 'context7', 'grep_app'],
   explorer: [],
   fixer: [],
+  reviewer: [],
 };
 
 export const DEFAULT_TMUX_CONFIG = {

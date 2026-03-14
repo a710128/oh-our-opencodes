@@ -924,6 +924,9 @@ describe('BackgroundTaskManager', () => {
       expect(manager.isAgentAllowed(orchestratorSessionId, 'librarian')).toBe(
         true,
       );
+      expect(manager.isAgentAllowed(orchestratorSessionId, 'reviewer')).toBe(
+        true,
+      );
     });
 
     test('isAgentAllowed returns false for invalid delegations', async () => {
@@ -1287,6 +1290,7 @@ describe('BackgroundTaskManager', () => {
         'librarian',
         'designer',
         'fixer',
+        'reviewer',
       ]);
 
       // Fixer -> empty (leaf node)
@@ -1345,6 +1349,7 @@ describe('BackgroundTaskManager', () => {
         'librarian',
         'designer',
         'fixer',
+        'reviewer',
       ]);
     });
   });

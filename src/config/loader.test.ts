@@ -70,36 +70,6 @@ describe('loadPluginConfig', () => {
     expect(config.agents?.librarian?.model).toBe('test/model');
   });
 
-  test('loads scoringEngineVersion flag when configured', () => {
-    const projectDir = path.join(tempDir, 'project');
-    const projectConfigDir = path.join(projectDir, '.opencode');
-    fs.mkdirSync(projectConfigDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(projectConfigDir, 'oh-our-opencodes.json'),
-      JSON.stringify({
-        scoringEngineVersion: 'v2-shadow',
-      }),
-    );
-
-    const config = loadPluginConfig(projectDir);
-    expect(config.scoringEngineVersion).toBe('v2-shadow');
-  });
-
-  test('loads balanceProviderUsage flag when configured', () => {
-    const projectDir = path.join(tempDir, 'project');
-    const projectConfigDir = path.join(projectDir, '.opencode');
-    fs.mkdirSync(projectConfigDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(projectConfigDir, 'oh-our-opencodes.json'),
-      JSON.stringify({
-        balanceProviderUsage: true,
-      }),
-    );
-
-    const config = loadPluginConfig(projectDir);
-    expect(config.balanceProviderUsage).toBe(true);
-  });
-
   test('loads manual plan structure when configured', () => {
     const projectDir = path.join(tempDir, 'project');
     const projectConfigDir = path.join(projectDir, '.opencode');
@@ -133,6 +103,12 @@ describe('loadPluginConfig', () => {
             fallback3: 'opencode/gpt-5-nano',
           },
           fixer: {
+            primary: 'openai/gpt-5.3-codex',
+            fallback1: 'anthropic/claude-opus-4-6',
+            fallback2: 'chutes/kimi-k2.5',
+            fallback3: 'opencode/gpt-5-nano',
+          },
+          reviewer: {
             primary: 'openai/gpt-5.3-codex',
             fallback1: 'anthropic/claude-opus-4-6',
             fallback2: 'chutes/kimi-k2.5',
@@ -982,14 +958,15 @@ describe('loadAgentPrompt', () => {
 
     // Use a unique agent name and check for it specifically
     const originalReadFileSync = fs.readFileSync;
-    const readSpy = spyOn(fs, 'readFileSync').mockImplementation(
-      (p: any, o: any) => {
-        if (typeof p === 'string' && p.includes('error-agent.md')) {
-          throw new Error('Read error');
-        }
-        return originalReadFileSync(p, o);
-      },
-    );
+    const readSpy = spyOn(fs, 'readFileSync').mockImplementation(((
+      p: any,
+      o: any,
+    ) => {
+      if (typeof p === 'string' && p.includes('error-agent.md')) {
+        throw new Error('Read error');
+      }
+      return originalReadFileSync(p, o);
+    }) as typeof fs.readFileSync);
 
     try {
       const result = loadAgentPrompt('error-agent');

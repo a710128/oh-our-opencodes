@@ -15,6 +15,7 @@ import { createExplorerAgent } from './explorer';
 import { createFixerAgent } from './fixer';
 import { createLibrarianAgent } from './librarian';
 import { type AgentDefinition, createOrchestratorAgent } from './orchestrator';
+import { createReviewerAgent } from './reviewer';
 
 export type { AgentDefinition } from './orchestrator';
 
@@ -63,7 +64,11 @@ function applyDefaultPermissions(
   // By default, most agents can ask the user questions, but we intentionally
   // disable it for certain subagents to avoid UX spam.
   const defaultQuestionPermission: 'ask' | 'allow' | 'deny' =
-    agent.name === 'explorer' || agent.name === 'fixer' ? 'deny' : 'allow';
+    agent.name === 'explorer' ||
+    agent.name === 'fixer' ||
+    agent.name === 'reviewer'
+      ? 'deny'
+      : 'allow';
 
   agent.config.permission = {
     ...existing,
@@ -94,6 +99,7 @@ const SUBAGENT_FACTORIES: Record<SubagentName, AgentFactory> = {
   librarian: createLibrarianAgent,
   designer: createDesignerAgent,
   fixer: createFixerAgent,
+  reviewer: createReviewerAgent,
 };
 
 // Public API

@@ -56,6 +56,12 @@ function buildDefaultUserConfig(): PluginConfig {
           skills: ['agents-markdown'],
           mcps: DEFAULT_AGENT_MCPS.fixer,
         },
+        reviewer: {
+          model: DEFAULT_MODELS.reviewer,
+          temperature: DEFAULT_AGENT_TEMPERATURES.reviewer,
+          skills: [],
+          mcps: DEFAULT_AGENT_MCPS.reviewer,
+        },
       },
     },
   };

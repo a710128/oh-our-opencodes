@@ -2,9 +2,10 @@
 import { install } from './install';
 import type { BooleanArg, InstallArgs } from './types';
 
-function parseArgs(args: string[]): InstallArgs {
+export function parseArgs(args: string[]): InstallArgs {
   const result: InstallArgs = {
     tui: true,
+    unknownArgs: [],
   };
 
   for (const arg of args) {
@@ -23,13 +24,15 @@ function parseArgs(args: string[]): InstallArgs {
     } else if (arg === '-h' || arg === '--help') {
       printHelp();
       process.exit(0);
+    } else {
+      result.unknownArgs?.push(arg);
     }
   }
 
   return result;
 }
 
-function printHelp(): void {
+export function printHelp(): void {
   console.log(`
 oh-our-opencodes installer
 
@@ -38,12 +41,14 @@ Usage: bunx oh-our-opencodes install [OPTIONS]
 
 Options:
   --model=<id>           Model id to use for all agents (required with --no-tui)
-  --tmux=yes|no          Enable tmux integration (yes/no)
-  --skills=yes|no        Install recommended skills (yes/no)
+  --tmux=yes|no          Enable tmux integration (yes/no, also honored in TUI mode)
+  --skills=yes|no        Install recommended and custom skills (yes/no)
   --no-tui               Non-interactive mode (requires --model)
   --dry-run              Simulate install without writing files or requiring OpenCode
-  --models-only          Update model assignments only (skip plugin/auth/skills)
+  --models-only          Update model assignments only (skip plugin setup/skills)
   -h, --help             Show this help message
+
+Removed legacy flags like --openai=yes and --antigravity=yes are no longer supported.
 
 Examples:
   bunx oh-our-opencodes install
@@ -73,7 +78,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}

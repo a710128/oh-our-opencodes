@@ -4,7 +4,7 @@ Complete reference for oh-our-opencodes configuration and capabilities.
 
 ## Table of Contents
 
-- [Presets](#presets)
+- [Manual Presets](#manual-presets)
 - [Skills](#skills)
 - [MCP Servers](#mcp-servers)
 - [Tools & Capabilities](#tools--capabilities)
@@ -12,30 +12,29 @@ Complete reference for oh-our-opencodes configuration and capabilities.
 
 ---
 
-## Presets
+## Manual Presets
 
-Presets are pre-configured agent model mappings for different provider combinations. The installer generates these automatically based on your available providers, and you can switch between them instantly.
+This fork only supports user-managed presets. There are no built-in presets in source.
 
-### OpenCode Free Discovery
+### Interactive Model Discovery
 
-The installer can discover the latest OpenCode free models by running:
+The installer can discover available models by running:
 
 ```bash
 opencode models --refresh --verbose
 ```
 
-Selection rules:
-- Only free `opencode/*` models are considered.
-- A coding-first primary model is selected for orchestration/strategy workloads.
-- A support model is selected for research/implementation workloads.
-- OpenCode-only mode can assign multiple OpenCode models across agents.
-- Hybrid mode can combine OpenCode free models with OpenAI/Kimi/Antigravity; `designer` remains on the external provider mapping.
+Current installer behavior:
+- Interactive install lets you choose one model from the discovered list
+- Non-interactive install requires `--model=<id>`
+- The chosen model is applied across all agents by default
 
 Useful flags:
 
 ```bash
---opencode-free=yes|no
---opencode-free-model=<id|auto>
+--model=<id>
+--tmux=yes|no
+--skills=yes|no
 ```
 
 ### Switching Presets
@@ -46,7 +45,7 @@ Edit `~/.config/opencode/oh-our-opencodes.json` (or `.jsonc`) and change the `pr
 
 ```json
 {
-  "preset": "openai"
+  "preset": "work"
 }
 ```
 
@@ -55,82 +54,29 @@ Edit `~/.config/opencode/oh-our-opencodes.json` (or `.jsonc`) and change the `pr
 Set the environment variable before running OpenCode:
 
 ```bash
-export OH_OUR_OPENCODES_PRESET=openai
+export OH_OUR_OPENCODES_PRESET=work
 opencode
 ```
 
 The environment variable takes precedence over the config file.
 
-### OpenAI Preset
-
-Uses OpenAI models exclusively:
+### Example Manual Preset
 
 ```json
 {
-  "preset": "openai",
+  "preset": "work",
   "presets": {
-    "openai": {
-      "orchestrator": { "model": "openai/gpt-5.2-codex", "skills": ["*"], "mcps": ["websearch"] },
+    "work": {
+      "orchestrator": { "model": "openai/gpt-5.3-codex", "skills": ["*"], "mcps": ["websearch"] },
       "librarian": { "model": "openai/gpt-5.1-codex-mini", "variant": "low", "skills": [], "mcps": ["websearch", "context7", "grep_app"] },
       "explorer": { "model": "openai/gpt-5.1-codex-mini", "variant": "low", "skills": [], "mcps": [] },
-      "designer": { "model": "openai/gpt-5.1-codex-mini", "variant": "medium", "skills": ["agent-browser"], "mcps": [] },
-      "fixer": { "model": "openai/gpt-5.1-codex-mini", "variant": "low", "skills": [], "mcps": [] }
+      "designer": { "model": "anthropic/claude-sonnet-4-5", "variant": "medium", "skills": ["agent-browser"], "mcps": [] },
+      "fixer": { "model": "openai/gpt-5.1-codex-mini", "variant": "low", "skills": [], "mcps": [] },
+      "reviewer": { "model": "openai/gpt-5.1-codex-mini", "variant": "low", "skills": [], "mcps": [] }
     }
   }
 }
 ```
-
-### Google Provider (Antigravity)
-
-Access Claude 4.5 and Gemini 3 models through Google's Antigravity infrastructure.
-
-**Installation:**
-```bash
-bunx oh-our-opencodes install --antigravity=yes --opencode-free=yes --opencode-free-model=auto
-```
-
-**Agent Mapping:**
-- Orchestrator: Kimi (if available)
-- Explorer/Librarian/Designer/Fixer: Gemini 3 Flash via Antigravity
-- If OpenCode free mode is enabled, Explorer/Librarian/Fixer may use selected free `opencode/*` support model while `designer` stays on external mapping
-
-**Authentication:**
-```bash
-opencode auth login
-# Select "google" provider
-```
-
-**Available Models:**
-- `google/antigravity-gemini-3-flash`
-- `google/antigravity-gemini-3.1-pro`
-- `google/antigravity-claude-sonnet-4-5`
-- `google/antigravity-claude-sonnet-4-5-thinking`
-- `google/antigravity-claude-opus-4-5-thinking`
-- `google/gemini-2.5-flash` (Gemini CLI)
-- `google/gemini-2.5-pro` (Gemini CLI)
-- `google/gemini-3-flash-preview` (Gemini CLI)
-- `google/gemini-3.1-pro-preview` (Gemini CLI)
-
-### Author's Preset
-
-Mixed setup combining multiple providers:
-
-```json
-{
-  "preset": "alvin",
-  "presets": {
-    "alvin": {
-      "orchestrator": { "model": "google/claude-opus-4-5-thinking", "skills": ["*"], "mcps": ["*"] },
-      "librarian": { "model": "google/gemini-3-flash", "variant": "low", "skills": [], "mcps": ["websearch", "context7", "grep_app"] },
-      "explorer": { "model": "cerebras/zai-glm-4.7", "variant": "low", "skills": [], "mcps": [] },
-      "designer": { "model": "google/gemini-3-flash", "variant": "medium", "skills": ["agent-browser"], "mcps": [] },
-      "fixer": { "model": "cerebras/zai-glm-4.7", "variant": "low", "skills": [], "mcps": [] }
-    }
-  }
-}
-```
-
-> **Antigravity Provider:** For complete Antigravity setup guide, see [Antigravity Setup](antigravity.md)
 
 ---
 
@@ -222,6 +168,7 @@ Control which agents can access which MCP servers using per-agent allowlists:
 | `librarian` | `websearch`, `context7`, `grep_app` |
 | `explorer` | none |
 | `fixer` | none |
+| `reviewer` | none |
 
 ### Configuration & Syntax
 
@@ -426,13 +373,13 @@ The plugin supports **JSONC** format for configuration files, allowing you to:
 
 ### Plugin Config (`oh-our-opencodes.json` or `oh-our-opencodes.jsonc`)
 
-The installer generates this file based on your providers. You can manually customize it to mix and match models. See the [Presets](#presets) section for detailed configuration options.
+The installer generates a `manual` preset based on the model you choose. You can then add or edit your own presets freely. See the [Manual Presets](#manual-presets) section for configuration examples.
 
 #### Option Reference
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `preset` | string | - | Name of the preset to use (e.g., `"openai"`, `"antigravity"`) |
+| `preset` | string | - | Name of the preset to use (e.g., `"manual"`, `"work"`) |
 | `presets` | object | - | Named preset configurations containing agent mappings |
 | `presets.<name>.<agent>.model` | string | - | Model ID for the agent (e.g., `"google/claude-opus-4-5-thinking"`) |
 | `presets.<name>.<agent>.temperature` | number | - | Temperature setting (0-2) for the agent |

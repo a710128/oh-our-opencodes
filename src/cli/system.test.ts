@@ -3,10 +3,6 @@
 import { describe, expect, mock, test } from 'bun:test';
 import { parseOpenCodeModelsVerboseOutput } from './opencode-models';
 import {
-  pickBestCodingOpenCodeModel,
-  pickSupportOpenCodeModel,
-} from './opencode-selection';
-import {
   fetchLatestVersion,
   getOpenCodeVersion,
   isOpenCodeInstalled,
@@ -96,61 +92,5 @@ openai/gpt-5.3-codex
     const models = parseOpenCodeModelsVerboseOutput(output);
     expect(models).toHaveLength(1);
     expect(models[0]?.model).toBe('opencode/glm-4.7-free');
-  });
-
-  test('pickBestCodingOpenCodeModel prefers stronger coding profile', () => {
-    const models = [
-      {
-        model: 'opencode/gpt-5-nano',
-        name: 'GPT-5 Nano',
-        status: 'active' as const,
-        contextLimit: 400000,
-        outputLimit: 128000,
-        reasoning: true,
-        toolcall: true,
-        attachment: true,
-      },
-      {
-        model: 'opencode/trinity-large-preview-free',
-        name: 'Trinity Large Preview',
-        status: 'active' as const,
-        contextLimit: 131072,
-        outputLimit: 131072,
-        reasoning: false,
-        toolcall: true,
-        attachment: false,
-      },
-    ];
-
-    const best = pickBestCodingOpenCodeModel(models);
-    expect(best?.model).toBe('opencode/gpt-5-nano');
-  });
-
-  test('pickSupportOpenCodeModel picks helper model different from primary', () => {
-    const models = [
-      {
-        model: 'opencode/glm-4.7-free',
-        name: 'GLM-4.7 Free',
-        status: 'active' as const,
-        contextLimit: 204800,
-        outputLimit: 131072,
-        reasoning: true,
-        toolcall: true,
-        attachment: false,
-      },
-      {
-        model: 'opencode/gpt-5-nano',
-        name: 'GPT-5 Nano',
-        status: 'active' as const,
-        contextLimit: 400000,
-        outputLimit: 128000,
-        reasoning: true,
-        toolcall: true,
-        attachment: true,
-      },
-    ];
-
-    const support = pickSupportOpenCodeModel(models, 'opencode/glm-4.7-free');
-    expect(support?.model).toBe('opencode/gpt-5-nano');
   });
 });
