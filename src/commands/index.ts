@@ -1,4 +1,5 @@
 import { commitCommand } from './commit';
+import { mergeCommand } from './merge';
 import { startCommand } from './start';
 import type { OpenCodeCommandMap } from './types';
 
@@ -10,5 +11,6 @@ import type { OpenCodeCommandMap } from './types';
  */
 export const injectedCommands: OpenCodeCommandMap = {
   commit: commitCommand,
+  merge: mergeCommand,
   start: startCommand,
 };
